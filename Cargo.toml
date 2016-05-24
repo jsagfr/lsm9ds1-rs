@@ -1,0 +1,6 @@
+[package]
+name = "lsm9ds1"
+version = "0.1.0"
+authors = ["jerome"]
+
+[dependencies]
