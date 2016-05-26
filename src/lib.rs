@@ -1,7 +1,7 @@
 #![allow(dead_code)]
-mod register;
-mod reg6;
-mod out_acc;
+pub mod register;
+pub mod reg6;
+pub mod out_acc;
 
 use std::u16::MAX;
 use register::{WriteAddress, ReadAddress, ReadWordAddress, Write};
@@ -24,6 +24,14 @@ struct Lsm9ds1<D: Device> {
 }
 
 impl<D: Device> Lsm9ds1<D> {
+    
+    pub fn new(device: D) -> Lsm9ds1<D> {
+        Lsm9ds1 {
+            reg6: None,
+            device: device,
+        }
+    }
+    
     // TODO: Result<>
     fn scale_acc(&self, value: u16) -> Option<f32> {
         match self.reg6 {
