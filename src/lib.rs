@@ -10,11 +10,11 @@ use out_acc::{OUT_X_ADDRESS_R, OUT_Y_ADDRESS_R, OUT_Z_ADDRESS_R};
 
 pub trait Device {
     // TODO: Result<>
-    fn read(&self, ReadAddress) -> u8;
+    fn read(&self, address: ReadAddress) -> u8;
     // TODO: Result<>
-    fn readword(&self, ReadWordAddress) -> u16;
+    fn readword(&self, address: ReadWordAddress) -> u16;
     // TODO: Result<>
-    fn write<T: Write>(&self, T);   
+    fn write<T: Write>(&self, cmd: T);   
 }
 
 
@@ -40,18 +40,23 @@ impl<D: Device> Lsm9ds1<D> {
         }
     }
     
-    fn x(&self) -> Option<f32> {
+    pub fn x(&self) -> Option<f32> {
         let raw_x = self.device.readword(OUT_X_ADDRESS_R);
         self.scale_acc(raw_x)
     }
     
-    fn y(&self) -> Option<f32> {
+    pub fn y(&self) -> Option<f32> {
         self.scale_acc(self.device.readword(OUT_X_ADDRESS_R))
     }
     
-    fn z(&self) -> Option<f32> {
+    pub fn z(&self) -> Option<f32> {
         self.scale_acc(self.device.readword(OUT_Z_ADDRESS_R))
     }
+
+    pub fn write<T: Write>(&self, cmd: T) {
+        self.device.write(cmd);
+    }
+
 }
 
 #[cfg(test)]
