@@ -48,20 +48,22 @@ impl<D: Device> Lsm9ds1<D> {
         }
     }
     
-    pub fn x(&self) -> Option<f32> {
+    pub fn x(&mut self) -> Option<f32> {
         let raw_x = self.device.readword(OUT_X_ADDRESS_R);
         self.scale_acc(raw_x)
     }
     
-    pub fn y(&self) -> Option<f32> {
-        self.scale_acc(self.device.readword(OUT_X_ADDRESS_R))
+    pub fn y(&mut self) -> Option<f32> {
+        let raw_y = self.device.readword(OUT_Y_ADDRESS_R);
+        self.scale_acc(raw_y)
     }
     
-    pub fn z(&self) -> Option<f32> {
-        self.scale_acc(self.device.readword(OUT_Z_ADDRESS_R))
+    pub fn z(&mut self) -> Option<f32> {
+        let raw_z = self.device.readword(OUT_Z_ADDRESS_R);
+        self.scale_acc(raw_z)
     }
 
-    pub fn write<T: Write>(&self, cmd: T) {
+    pub fn write<T: Write>(&mut self, cmd: T) {
         self.device.write(cmd);
     }
 
