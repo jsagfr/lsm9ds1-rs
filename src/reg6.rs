@@ -68,7 +68,7 @@ impl Write for Reg6 {
 // TODO: Result or N/A?
 // TODO: Bit matching?
 impl Reg6 {
-    fn decode(value: u8) -> Reg6 {
+    pub fn decode(value: u8) -> Reg6 {
         let odr = match value & 0b111_00000 {
             0b000_00000 => Reg6ODR::PowerDown,
             0b001_00000 => Reg6ODR::Freq10Hz,
@@ -110,7 +110,7 @@ impl Reg6 {
 
 
 impl Reg6Builder {
-    fn new() -> Reg6Builder {
+    pub fn new() -> Reg6Builder {
         Reg6Builder {
             odr: Reg6ODR::PowerDown,
             fs:  Reg6FS::Acc2g,
@@ -119,27 +119,27 @@ impl Reg6Builder {
         }
     }
 
-    fn ord(&mut self, cmd: Reg6ODR) -> &mut Reg6Builder {
+    pub fn ord(&mut self, cmd: Reg6ODR) -> &mut Reg6Builder {
         self.odr = cmd;
         self
     }
 
-    fn fs(&mut self, cmd: Reg6FS) -> &mut Reg6Builder {
+    pub fn fs(&mut self, cmd: Reg6FS) -> &mut Reg6Builder {
         self.fs = cmd;
         self
     }
 
-    fn bs(&mut self, cmd: Reg6BS) -> &mut Reg6Builder {
+    pub fn bs(&mut self, cmd: Reg6BS) -> &mut Reg6Builder {
         self.bs = cmd;
         self
     }
 
-    fn bw(&mut self, cmd: Reg6BW) -> &mut Reg6Builder {
+    pub fn bw(&mut self, cmd: Reg6BW) -> &mut Reg6Builder {
         self.bw = cmd;
         self
     }
     
-    fn finalize(&self) -> Reg6 {
+    pub fn finalize(&self) -> Reg6 {
         Reg6 {
             odr: self.odr,
             fs:  self.fs,

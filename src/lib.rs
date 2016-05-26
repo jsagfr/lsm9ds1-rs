@@ -18,7 +18,7 @@ pub trait Device {
 }
 
 
-struct Lsm9ds1<D: Device> {
+pub struct Lsm9ds1<D: Device> {
     reg6: Option<reg6::Reg6>,
     device: D,
 }
