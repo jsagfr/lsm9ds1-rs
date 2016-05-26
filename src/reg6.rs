@@ -1,9 +1,11 @@
-use register::{RegisterAddress, RegisterReadable, RegisterWritable};
+use register::{WriteAddress, ReadAddress, Write};
 
 const CTRL_REG6_XL: u8 = 0x20;
+const REG6_ADDRESS_W: WriteAddress = WriteAddress(CTRL_REG6_XL);
+pub const REG6_ADDRESS_R: ReadAddress = ReadAddress(CTRL_REG6_XL);
 
 #[derive(Debug, Clone, Copy)]
-enum Reg6ODR {
+pub enum Reg6ODR {
     PowerDown = 0b000_00000,
     Freq10Hz  = 0b001_00000,
     Freq50Hz  = 0b010_00000,
@@ -14,7 +16,7 @@ enum Reg6ODR {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Reg6FS {
+pub enum Reg6FS {
     Acc2g  = 0b000_00_000,
     Acc16g = 0b000_01_000,
     Acc4g  = 0b000_10_000,
@@ -22,13 +24,13 @@ enum Reg6FS {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Reg6BS {
+pub enum Reg6BS {
     Auto = 0b00000_0_00,
     Manu = 0b00000_1_00,
 }
 
 #[derive(Debug, Clone, Copy)]
-enum Reg6BW {
+pub enum Reg6BW {
     Freq408Hz = 0b000000_00,
     Freq211Hz = 0b000000_01,
     Freq105Hz = 0b000000_10,
@@ -37,7 +39,7 @@ enum Reg6BW {
 
 
 #[derive(Debug, Clone, Copy)]
-struct Reg6Builder {
+pub struct Reg6Builder {
     odr: Reg6ODR,
     fs:  Reg6FS,
     bs:  Reg6BS,
@@ -46,23 +48,27 @@ struct Reg6Builder {
 
 
 #[derive(Debug, Clone, Copy)]
-struct Reg6 {
-    odr: Reg6ODR,
-    fs:  Reg6FS,
-    bs:  Reg6BS,
-    bw:  Reg6BW,
+pub struct Reg6 {
+    pub odr: Reg6ODR,
+    pub fs:  Reg6FS,
+    pub bs:  Reg6BS,
+    pub bw:  Reg6BW,
 }
 
-impl RegisterAddress for Reg6 {
-    fn address(self) -> u8 {
-        CTRL_REG6_XL
+impl Write for Reg6 {
+    fn address(&self) -> WriteAddress {
+        REG6_ADDRESS_W
+    }
+
+    fn value(&self) -> u8 {
+        (self.odr as u8) | (self.fs  as u8) | (self.bs  as u8) | (self.bw  as u8)
     }
 }
 
 // TODO: Result or N/A?
 // TODO: Bit matching?
-impl RegisterReadable<Reg6> for Reg6 {
-    fn read(value: u8) -> Reg6 {
+impl Reg6 {
+    fn decode(value: u8) -> Reg6 {
         let odr = match value & 0b111_00000 {
             0b000_00000 => Reg6ODR::PowerDown,
             0b001_00000 => Reg6ODR::Freq10Hz,
@@ -92,7 +98,6 @@ impl RegisterReadable<Reg6> for Reg6 {
             0b000000_11 => Reg6BW::Freq50Hz,
             _ => panic!("unpossible"),
         };
-        
         Reg6 {
             odr: odr,
             fs:  fs,
@@ -102,11 +107,6 @@ impl RegisterReadable<Reg6> for Reg6 {
     }
 }
 
-impl RegisterWritable for Reg6 {
-    fn write(self) -> u8 {
-        (self.odr as u8) | (self.fs  as u8) | (self.bs  as u8) | (self.bw  as u8)
-    }
-}
 
 
 impl Reg6Builder {
@@ -154,31 +154,31 @@ impl Reg6Builder {
 #[cfg(test)]
 mod tests {
     use super::{Reg6, Reg6Builder, Reg6ODR, Reg6FS, Reg6BS, Reg6BW};
-    use register::{RegisterAddress, RegisterReadable, RegisterWritable};
+    use register::{WriteAddress, ReadAddress, Write};
     
-    #[test]
+     #[test]
     fn address() {
         let r = Reg6Builder::new().finalize();
-        assert_eq!(r.address(), 0x20);
+        assert_eq!(r.address(), WriteAddress(0x20));
     }
 
     #[test]
     fn write_reg() {
         let r = Reg6Builder::new().finalize();
-        assert_eq!(r.write(), 0b00000000);
+        assert_eq!(r.value(), 0b00000000);
         let r = Reg6Builder::new()
             .ord(Reg6ODR::Freq119Hz)
             .fs(Reg6FS::Acc8g)
             .bs(Reg6BS::Manu)
             .bw(Reg6BW::Freq105Hz)
             .finalize();
-        assert_eq!(r.write(), 0b011_11_1_10);
+        assert_eq!(r.value(), 0b011_11_1_10);
     }
 
     #[test]
     fn read_reg() {
         // TODO: Quickcheck
-        let r = Reg6::read(0b011_11_1_10);
-        assert_eq!(r.write(), 0b011_11_1_10);            
+        let r = Reg6::decode(0b011_11_1_10);
+        assert_eq!(r.value(), 0b011_11_1_10);            
     }
 }
