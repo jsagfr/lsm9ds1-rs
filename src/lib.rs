@@ -10,11 +10,11 @@ use out_acc::{OUT_X_ADDRESS_R, OUT_Y_ADDRESS_R, OUT_Z_ADDRESS_R};
 
 pub trait Device {
     // TODO: Result<>
-    fn read(&self, address: ReadAddress) -> u8;
+    fn read(&mut self, address: ReadAddress) -> u8;
     // TODO: Result<>
-    fn readword(&self, address: ReadWordAddress) -> u16;
+    fn readword(&mut self, address: ReadWordAddress) -> u16;
     // TODO: Result<>
-    fn write<T: Write>(&self, cmd: T);   
+    fn write<T: Write>(&mut self, cmd: T);   
 }
 
 
