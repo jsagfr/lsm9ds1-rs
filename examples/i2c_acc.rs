@@ -4,7 +4,7 @@ extern crate lsm9ds1;
 use i2cdev::linux::LinuxI2CDevice;
 use i2cdev::core::I2CDevice;
 
-use lsm9ds1::{Lsm9ds1, Device};
+use lsm9ds1::{Lsm9ds1, Device, Cmd};
 use lsm9ds1::register::{ReadAddress, ReadWordAddress, WriteAddress, Write};
 use lsm9ds1::reg6::{Reg6Builder, Reg6ODR, Reg6FS};
 
@@ -64,10 +64,13 @@ fn main() {
         .ord(Reg6ODR::Freq119Hz)
         .fs(Reg6FS::Acc2g)
         .finalize();
-    l.write(r);
+    l.write(Cmd::Reg6(r));
 
     for _ in 0..100 {
-        println!("x: {:?}, y:{:?}, z:{:?}", l.x(), l.y(), l.z());
+        println!("x: {:?}, y:{:?}, z:{:?}",
+                 l.x().unwrap(),
+                 l.y().unwrap(),
+                 l.z().unwrap());
         thread::sleep(d);
     }
 }
