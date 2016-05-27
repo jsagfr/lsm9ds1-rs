@@ -1,6 +1,7 @@
 [package]
 name = "lsm9ds1"
 version = "0.1.0"
-authors = ["jerome"]
+authors = ["Jérôme Guéry <jerome.guery@gmail.com>"]
 
 [dependencies]
+i2cdev = { git = "https://github.com/rust-embedded/rust-i2cdev" }
