@@ -1,56 +1,13 @@
-extern crate i2cdev;
 extern crate lsm9ds1;
 
-use i2cdev::linux::LinuxI2CDevice;
-use i2cdev::core::I2CDevice;
-
-use lsm9ds1::{Lsm9ds1, Device, Cmd};
-use lsm9ds1::register::{ReadAddress, ReadWordAddress, WriteAddress, Write};
+use lsm9ds1::{Lsm9ds1, Cmd};
+use lsm9ds1::i2c::Lsm9ds1I2c;
 use lsm9ds1::accelerometer::{Reg6Builder, Reg6ODR, Reg6FS};
+
 
 
 use std::thread;
 use std::time::Duration;
-
-const SLAVE_ADDR2: u16 = 0x6b;
-
-struct Lsm9ds1I2c {
-    acc_dev: LinuxI2CDevice
-}
-
-impl Lsm9ds1I2c {
-    fn new(acc_path: &str) -> Lsm9ds1I2c {
-        Lsm9ds1I2c {
-            acc_dev: LinuxI2CDevice::new(acc_path, SLAVE_ADDR2).expect("unable to open device")
-        }
-    }
-}
-
-
-
-impl Device for Lsm9ds1I2c {
-    fn read(&mut self, address: ReadAddress) -> u8 {
-        let ReadAddress(v) = address;
-        match self.acc_dev.smbus_read_byte_data(v) {
-            Ok(r) => r,
-            Err(_) => 0
-        }
-    }
-
-    fn readword(&mut self, address: ReadWordAddress) -> u16 {
-        let ReadWordAddress(v) = address;
-        match self.acc_dev.smbus_read_word_data(v) {
-            Ok(r) => r,
-            Err(_) => 0
-        }
-    }
-    
-    fn write<T: Write>(&mut self, cmd: T) {
-        let WriteAddress(v) = cmd.address();
-        self.acc_dev.smbus_write_byte_data(v, cmd.value()).expect("unable to write command on device"); 
-   }
-}
-
 
 
 fn main() {
@@ -67,7 +24,7 @@ fn main() {
     l.write(Cmd::Reg6(r));
 
     for _ in 0..100 {
-        println!("x: {:?}, y:{:?}, z:{:?}",
+        println!("x:{:>#13.10}, y:{:>#13.10}, z:{:>#13.10}",
                  l.x().unwrap(),
                  l.y().unwrap(),
                  l.z().unwrap());

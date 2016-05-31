@@ -1,9 +1,13 @@
 #![allow(dead_code)]
+extern crate i2cdev;
+
+
 pub mod register;
 pub mod accelerometer;
+pub mod i2c;
 
 use std::i16::MAX;
-use register::{WriteAddress, ReadAddress, ReadWordAddress, Write};
+use register::{ReadAddress, ReadWordAddress, Write};
 use accelerometer::{Reg6, Reg6FS, OUT_X_ADDRESS_R, OUT_Y_ADDRESS_R, OUT_Z_ADDRESS_R};
 
 pub trait Device {
