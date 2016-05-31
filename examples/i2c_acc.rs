@@ -6,7 +6,7 @@ use i2cdev::core::I2CDevice;
 
 use lsm9ds1::{Lsm9ds1, Device, Cmd};
 use lsm9ds1::register::{ReadAddress, ReadWordAddress, WriteAddress, Write};
-use lsm9ds1::reg6::{Reg6Builder, Reg6ODR, Reg6FS};
+use lsm9ds1::accelerometer::{Reg6Builder, Reg6ODR, Reg6FS};
 
 
 use std::thread;

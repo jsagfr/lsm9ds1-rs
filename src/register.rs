@@ -11,3 +11,4 @@ pub trait Write {
     fn address(&self) -> WriteAddress;
     fn value(&self) -> u8;
 }
+

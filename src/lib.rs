@@ -1,12 +1,10 @@
 #![allow(dead_code)]
 pub mod register;
-pub mod reg6;
-pub mod out_acc;
+pub mod accelerometer;
 
 use std::i16::MAX;
 use register::{WriteAddress, ReadAddress, ReadWordAddress, Write};
-use reg6::Reg6FS;
-use out_acc::{OUT_X_ADDRESS_R, OUT_Y_ADDRESS_R, OUT_Z_ADDRESS_R};
+use accelerometer::{Reg6, Reg6FS, OUT_X_ADDRESS_R, OUT_Y_ADDRESS_R, OUT_Z_ADDRESS_R};
 
 pub trait Device {
     // TODO: Result<>
@@ -18,12 +16,12 @@ pub trait Device {
 }
 
 pub enum Cmd {
-    Reg6(reg6::Reg6),
+    Reg6(Reg6),
 }
 
 
 pub struct Lsm9ds1<D: Device> {
-    reg6: Option<reg6::Reg6>,
+    reg6: Option<Reg6>,
     device: D,
 }
 
