@@ -5,3 +5,4 @@ authors = ["Jérôme Guéry <jerome.guery@gmail.com>"]
 
 [dependencies]
 i2cdev = { git = "https://github.com/rust-embedded/rust-i2cdev" }
+bitflags = "0.7.0"

@@ -1,4 +1,9 @@
-use register::{WriteAddress, ReadAddress, ReadWordAddress, Write};
+#[macro_use]
+extern crate bitflags;
+
+use register::{Address, WriteAddress, ReadAddress, ReadWordAddress, Write};
+
+
 
 const OUT_X_XL: u8 = 0x28;
 const OUT_Y_XL: u8 = 0x2A;
@@ -12,6 +17,20 @@ pub const OUT_Z_ADDRESS_R: ReadWordAddress = ReadWordAddress(OUT_Z_XL);
 const CTRL_REG6_XL: u8 = 0x20;
 const REG6_ADDRESS_W: WriteAddress = WriteAddress(CTRL_REG6_XL);
 pub const REG6_ADDRESS_R: ReadAddress = ReadAddress(CTRL_REG6_XL);
+
+// #[derive(Debug, Clone, Copy)]
+// pub enum Config {
+//     ODR(Reg6ODR),
+//     FS(Reg6FS),
+//     BS(Reg6BS),
+    
+// }
+
+
+
+
+
+
 
 #[derive(Debug, Clone, Copy)]
 pub enum Reg6ODR {
@@ -46,6 +65,30 @@ pub enum Reg6BW {
     Freq50Hz  = 0b000000_11,
 }
 
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfgXLAoiXL {
+// }
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfg6D {
+// }
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfgZHIE_XL {
+// }
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfgZLIE_XL {
+// }
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfgYHIE_XL {
+// }
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfgYLIE_XL{
+// }
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfgXHIE_XL {
+// }
+// #[derive(Debug, Clone, Copy)]
+// pub enum IntGenCfgXLIE_XL {
+// }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Reg6Builder {
