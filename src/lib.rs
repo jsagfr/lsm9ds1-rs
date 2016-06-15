@@ -5,7 +5,11 @@ extern crate bitflags;
 
 
 mod register;
+mod config;
 
+mod act_ths_reg;
+mod act_dur_reg;
+mod int_gen_cfg_xl;
 
 use register::{Address};
 
@@ -16,6 +20,41 @@ pub trait Lsm9ds1Device {
     fn writeword(&mut self, address: Address, value: u16) -> Result<(),()>;
 }
 
+
+pub struct Lsm9ds1 {
+    // TBC
+}
+
+enum Interrupts{}
+enum ParamType{
+    
+}
+enum Param{}
+
+impl Lsm9ds1 {
+    fn temp(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn lx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn ly(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn lz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gy(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn mx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn my(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn mz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn fifo(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn linterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
+    fn ginterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
+    fn params(&mut self) -> Vec<Param> { unimplemented!() }
+    fn param(&mut self, param_type: ParamType) -> Result<Param, ()> { unimplemented!() }
+    fn set_params(&mut self, params: Vec<Param>) -> Result<(), ()> { unimplemented!() }
+    fn set_param(&mut self, param_type: ParamType) -> Result<(), ()> { unimplemented!() }
+    
+
+    // fn status(&mut self) -> Result<Status,()> { unimplemented!() }
+    // fn all(&mut self) -> MesureIterator
+
+}
 
 // pub mod accelerometer;
 // pub mod i2c;

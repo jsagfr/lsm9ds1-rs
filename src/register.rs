@@ -63,23 +63,84 @@ const INT_CFG_M:        Address = Address::RW(0x30);
 const INT_SRC_M:        Address = Address::R(0x31);
 const INT_THS_M:        Address = Address::R16(0x32);
 
-enum Config {
-    SleepOnInactEn(bool),
-    ActThs(u8),
-    ActDur(u8),
-    
-        
-}
+
+
 
 mod accelerometer_gyroscope {
+
+    enum ParamType{
+        SleepOnInactEn,
+        ActThs,
+        ActDur,    
+    }
+    enum Param {
+        SleepOnInactEn(bool),
+        ActThs(u8),
+        ActDur(u8),
+    }
+
+    enum SleepAT {
+        On,
+        Off
+    }
+
+    // fn decode(value: u8) -> (SleepAT, u8) {
+    //     (match value & SLEEP_ON_INACT_EN as u8 {
+    //         SLEEP_ON_INACT_EN as u8 => SleepAT::On,
+    //         _ => SleepAT::Off,
+    //     }, value & ACT_THS_VALUE)
+    // }
+
+    // bitflags! {
+    //     flags TActThs: u8 {
+    //         const T_SLEEP_ON_INACT_EN = 0b10000000,
+    //     }
+    // }
+
+    // impl TActThs {
+    //     value(v: u8) -> Result<Self,()> {
+    //         match v & T_SLEEP_ON_INACT_EN.bits() {
+    //             0 => Ok(),
+    //             _ => Err(),
+    //         }
+    //     }
+
+    //     // value(&mut self, v: u8) {
+            
+    //     // }
+    // }
+
     
-    bitflags! {
-        flags ActThs: u8 {
-            const SLEEP_ON_INACT_EN = 0b10000000,
-            const ACT_THS_VALUE     = 0b01111111,
+    const SLEEP_ON_INACT_EN: u8 = 0b10000000;
+    const ACT_THS_MASK:      u8 = 0b01111111;
+    
+    struct ActThsReg {}
+
+    impl ActThsReg {
+        fn decode(value: u8) -> Vec<Param> {
+            let a = Param::SleepOnInactEn(value & SLEEP_ON_INACT_EN != 0);
+            // let a = match value & SLEEP_ON_INACT_EN {
+            //     SLEEP_ON_INACT_EN => Param::SleepOnInactEn(true),
+            //     _                 => Param::SleepOnInactEn(false),
+            // };
+            let b = Param::ActThs(value & ACT_THS_MASK);
+            vec![a, b]
+        }
+        fn encode(params: Vec<Param>) -> u8 {
+            let mut res: u8 = 0;
+            for param in params {
+                match param {                   
+                    Param::SleepOnInactEn(true)  => res |=  SLEEP_ON_INACT_EN,
+                    Param::SleepOnInactEn(false) => res |= !SLEEP_ON_INACT_EN,
+                    Param::ActThs(v)         => res |= v,
+                    _                 => {},
+                }
+            }
+            res
         }
     }
 
+    
     bitflags! {
         flags IntGenCfgXL: u8 {
             const AOI_XL    = 0b10000000,
