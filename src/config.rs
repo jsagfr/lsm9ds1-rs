@@ -2,41 +2,74 @@
 use std::collections::HashMap;
 use std::iter::Iterator;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Param {
-    P1,
-    P2,
-    P3(u8),
+pub enum State {
+    Enable,
+    Disable,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum ParamType {
-    P1,
-    P2,
-    P3,
+macro_rules! enum_with_type {
+    ( $E:ident, $ET:ident { $( $e:ident => $et:ty ),* }) => {
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        pub enum $E {
+            $($e($et)),*
+        }
+        
+        #[derive(Clone, Copy, Debug, PartialEq)]
+        pub enum $ET {
+            $($e),*
+        }
+    }
 }
+
+enum_with_type!{
+    Param, ParamType {
+        ActThs => u8,
+        SleepOn => State,
+        ActDur => u8,
+        AoiXl => State,
+        Detect6d => State,
+        ZhieXl => State,
+        ZlieXl => State,
+        YhieXl => State,
+        YlieXl => State,
+        XhieXl => State,
+        XlieXl => State
+    }
+}
+
 
 pub fn type_of_param(param: Param) -> ParamType {
     match param {
-        Param::P1 => ParamType::P1,
-        Param::P2 => ParamType::P2,
-        Param::P3(_) => ParamType::P3,
+        Param::ActThs(_) => ParamType::ActThs,
+        Param::SleepOn(_) => ParamType::SleepOn,
+        Param::ActDur(_) => ParamType::ActDur,
     }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Register {
-    R1
+    ActThs(u8),
+    ActDur(u8),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum RegisterType {
-    R1
+    ActThs,
+    ActDur,
 }
 
-fn reg1_from_params(params: &Vec<Param>) -> Result<Register,()> {
-    Ok(Register::R1)
+mod act_ths {
+    fn from_params(params: &Vec<Param>) -> Result<Register,()> {
+        Ok(Register::R1)
+    }
 }
+
+mod act_dur {
+    fn from_params(params: &Vec<Param>) -> Result<Register,()> {
+        Ok(Register::R1)
+    }
+}
+
 
 fn reg1_to_params(reg: Register) -> Result<Vec<Param>,()> {
     Ok(vec![Param::P1, Param::P2])
