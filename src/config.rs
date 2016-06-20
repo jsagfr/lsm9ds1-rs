@@ -8,6 +8,10 @@ pub enum State {
     Disable,
 }
 
+// pub trait TypeOf {
+//     pub 
+// }
+
 macro_rules! enum_with_type {
     ( $E:ident, $ET:ident {
         $($e:ident => $et:ty ),+
@@ -21,6 +25,14 @@ macro_rules! enum_with_type {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
         pub enum $ET {
             $($e),+
+        }
+
+        impl $E {
+            pub fn type_of(self: $E) -> $ET {
+                match self {
+                    $( $E::$e(_) => $ET::$e, )+
+                }
+            }
         }
     }
 }
@@ -41,32 +53,50 @@ enum_with_type!{
     }
 }
 
-pub fn type_of_param(param: Param) -> ParamType {
-    match param {
-        Param::ActThs(_) => ParamType::ActThs,
-        Param::SleepOn(_) => ParamType::SleepOn,
-        Param::ActDur(_) => ParamType::ActDur,
-        _ => unimplemented!(),
+
+enum_with_type!{
+    Register, RegisterType {
+        ActThs => u8,
+        ActDur => u8,
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Register {
-    ActThs(u8),
-    ActDur(u8),
+impl RegisterType {
+    fn from_params(&self, params: &Vec<Param>) -> Result<Register,()> {
+        match *self {
+            RegisterType::ActThs => act_ths::from_params(params),
+            _ => Err(()),
+        }
+    }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum RegisterType {
-    ActThs,
-    ActDur,
-}
+pub mod act_ths {
+    use super::{Register, Param, State};
 
-mod act_ths {
-    use super::{Register, Param};
-    
-    fn from_params(params: &Vec<Param>) -> Result<Register,()> {
-        unimplemented!();
+    const ACT_THS_MASK:  u8 = 0b0111_1111;
+    const SLEEP_ON_MASK: u8 = 0b1000_0000;
+
+    /// from params return a register with defaut values or values
+    /// given in the param or error.
+    pub fn from_params(params: &Vec<Param>) -> Result<Register,()> {
+        let mut reg: u8 = 0x00;     // Default is 0.
+        for &param in params {
+            match param {
+                Param::ActThs(x) => {
+                    // Check value correctness ("u7")
+                    match x & !ACT_THS_MASK {
+                        0 =>  reg |= x,
+                        _ => return Err(()),
+                    }
+                }
+                Param::SleepOn(x) => match x {
+                    State::Enable =>  reg |=  SLEEP_ON_MASK,
+                    State::Disable => reg &= !SLEEP_ON_MASK,
+                },
+                _ => return Err(()),
+            }
+        }
+        Ok(Register::ActThs(reg))
     }
 }
 
@@ -89,11 +119,11 @@ fn reg1_to_params(reg: Register) -> Result<Vec<Param>,()> {
 /// # Examples
 ///
 /// ```
-/// use lsm9ds1::config::{ConfigBuilder, Param};
+/// use lsm9ds1::config::{ConfigBuilder, Param, State};
 /// 
 /// let conf1 = ConfigBuilder::new()
-///     .set(Param::P1)
-///     .set(Param::P2)
+///     .set(Param::ActThs(5))
+///     .set(Param::SleepOn(State::Enable))
 ///     .build().unwrap();
 /// ```
 #[derive(Clone, Debug)]
@@ -141,13 +171,18 @@ impl ConfigBuilder {
         let mut hash_reg = HashMap::new();
         let mut hash_param = HashMap::new();
         for &p in &self.params {
-            let old = hash_param.insert(type_of_param(p), p);
+            let old = hash_param.insert(p.type_of(), p);
+            // Check if the duplicated param is identique:
             match old {
                 None => {}
-                Some(old_p) => if old_p != p {return Err(())}
+                Some(old_p) => if old_p != p {return Err(())} // If not, it's an error. TODO: explain error.
             }
             match p {
                 Param::ActThs(_) => {
+                    let params = hash_reg.entry(RegisterType::ActThs).or_insert(Vec::new());
+                    params.push(p);
+                }
+                Param::SleepOn(_) => {
                     let params = hash_reg.entry(RegisterType::ActThs).or_insert(Vec::new());
                     params.push(p);
                 }
@@ -161,9 +196,10 @@ impl ConfigBuilder {
 
         let mut registers = Vec::new();
         for (key, params) in hash_reg.iter() {
-            unimplemented!();
+            // unimplemented!();
+            registers.push(try!(key.from_params(params)));
             // match *key {
-            //     RegisterType::R1 => registers.push(try!(reg1_from_params(params)))
+            //     RegisterType::ActThs => registers.push(try!(reg1_from_params(params)))
             // }
         }
 
@@ -233,7 +269,7 @@ impl Registers {
             match reg {
                 Register::ActThs(_) => {
                     for p in try!(reg1_to_params(reg)) {
-                        params.insert(type_of_param(p), p);
+                        params.insert(p.type_of(), p);
                     }
                 }
                 _ => unimplemented!(),
@@ -339,20 +375,20 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use super::{ConfigBuilder, Registers, Param};
+    use super::{ConfigBuilder, Registers, Param, State};
     // use params::Param;
     
     #[test]
     fn it_works() {
         let conf1 = ConfigBuilder::new()
-            // .set(Param::P1)
-            // .set(Param::P2)
+            .set(Param::ActThs(5))
+            .set(Param::SleepOn(State::Enable))
             .build().unwrap();
-        let conf2 = Registers::new().
-            set_all(conf1.registers())
-            .build().unwrap();
+        // let conf2 = Registers::new().
+        //     set_all(conf1.registers())
+        //     .build().unwrap();
 
-        assert_eq!(conf1, conf2);
+        // assert_eq!(conf1, conf2);
         
             
     }
