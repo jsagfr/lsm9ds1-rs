@@ -8,21 +8,29 @@ pub enum State {
     Disable,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AndOrState {
+    And,
+    Or,
+}
 // pub trait TypeOf {
 //     pub 
 // }
 
 macro_rules! enum_with_type {
-    ( $E:ident, $ET:ident {
-        $($e:ident => $et:ty ),+
+    ( $(#[$Eattr:meta])* enum $E:ident,
+      $(#[$ETattr:meta])* enum_type $ET:ident {
+        $($(#[$eattr:meta])* variant $e:ident => $et:ty ),+
             $(,)*
     }) => {
-        #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+        // #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+        $(#[$Eattr])*
         pub enum $E {
-            $($e($et)),+
+            $($(#[$eattr])* $e($et)),+
         }
         
-        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+        // #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+        $(#[$ETattr])*
         pub enum $ET {
             $($e),+
         }
@@ -38,31 +46,58 @@ macro_rules! enum_with_type {
 }
 
 enum_with_type!{
-    Param, ParamType {
-        ActThs => u8,
-        SleepOn => State,
-        ActDur => u8,
-        AoiXl => State,
-        Detect6d => State,
-        ZhieXl => State,
-        ZlieXl => State,
-        YhieXl => State,
-        YlieXl => State,
-        XhieXl => State,
-        XlieXl => State,
+    /// Parameters used to configure or given when reading a
+    /// *LSM9DS1*.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    enum Param,
+    /// Parameters type used to get a *LSM9DS1* configuration.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    enum_type ParamType {
+        /// Gyroscope inactivity threshold.
+        ///
+        /// __TODO: Question: is accelerometer concerned?__
+        /// 
+        /// * Possible values in `0..2**7`
+        /// * Default value is `0`
+        variant ActThs => u8,
+        /// Gyroscope operating mode during inactivity.
+        ///
+        /// * Default value is `Disable`
+        variant SleepOn => State,
+        /// Gyroscope inactivity duration.
+        ///
+        /// __TODO: Question: is accelerometer concerned?__
+        /// 
+        /// * Possible values in `u8`
+        /// * Default value is `0`
+        variant ActDur => u8,
+        /// AND/OR combination of accelerometer's interrupt events.
+        /// 
+        /// * Default value: `Or`
+        variant AoiXl => AndOrState,
+        variant Detect6D => State,
+        variant ZhieXl => State,
+        variant ZlieXl => State,
+        variant YhieXl => State,
+        variant YlieXl => State,
+        variant XhieXl => State,
+        variant XlieXl => State,
     }
 }
 
 
 enum_with_type!{
-    Register, RegisterType {
-        ActThs => u8,
-        ActDur => u8,
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    enum Register,
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    enum_type RegisterType {
+        variant ActThs => u8,
+        variant ActDur => u8,
     }
 }
 
 impl RegisterType {
-    fn from_params(&self, params: &Vec<Param>) -> Result<Register,()> {
+    fn from_params(&self, params: &[Param]) -> Result<Register,()> {
         match *self {
             RegisterType::ActThs => act_ths::from_params(params),
             _ => Err(()),
@@ -78,7 +113,9 @@ pub mod act_ths {
 
     /// from params return a register with defaut values or values
     /// given in the param or error.
-    pub fn from_params(params: &Vec<Param>) -> Result<Register,()> {
+    /// 
+    /// Defaut value is 
+    pub fn from_params(params: &[Param]) -> Result<Register,()> {
         let mut reg: u8 = 0x00;     // Default is 0.
         for &param in params {
             match param {
@@ -98,20 +135,31 @@ pub mod act_ths {
         }
         Ok(Register::ActThs(reg))
     }
+
+    pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
+        match reg {
+            Register::ActThs(r) => {
+                let sleep_on = match r & SLEEP_ON_MASK {
+                    SLEEP_ON_MASK => Param::SleepOn(State::Enable),
+                    0 => Param::SleepOn(State::Enable),
+                    _ => unreachable!(),
+                };
+                let act_ths = Param::ActThs(r & ACT_THS_MASK);
+                Ok(vec![sleep_on, act_ths])
+            }
+            _ => Err(()),
+        }
+    }
 }
 
 mod act_dur {
     use super::{Register, Param};
 
-    fn from_params(params: &Vec<Param>) -> Result<Register,()> {
+    fn from_params(params: &[Param]) -> Result<Register,()> {
         unimplemented!();
     }
 }
 
-
-fn reg1_to_params(reg: Register) -> Result<Vec<Param>,()> {
-    unimplemented!();
-}
 
 /// `ConfigBuilder` is use to create a partial or total new configuration of
 /// a *LSM9DS1*.
@@ -146,7 +194,7 @@ impl ConfigBuilder {
     }
 
     /// Set a list of parameters.
-    pub fn set_all<'a>(&'a mut self, params: &Vec<Param>) -> &'a mut ConfigBuilder {
+    pub fn set_all<'a>(&'a mut self, params: &[Param]) -> &'a mut ConfigBuilder {
         self.params.extend(params);
         self
     }
@@ -165,7 +213,12 @@ impl ConfigBuilder {
     /// # Example
     ///
     /// ```
-    /// assert!(false);
+    /// use lsm9ds1::config::{ConfigBuilder, Param, State};
+    /// 
+    /// let conf1 = ConfigBuilder::new()
+    ///     .set(Param::ActThs(5))
+    ///     .set(Param::SleepOn(State::Enable))
+    ///     .build().unwrap();
     /// ```
     pub fn build(&self) -> Result<Config,()> {
         let mut hash_reg = HashMap::new();
@@ -218,8 +271,8 @@ impl ConfigBuilder {
 /// ```
 /// use lsm9ds1::config::{Registers, Register};
 /// 
-/// let conf1 = Registers::new()
-///     .set(Register::R1)
+/// let conf = Registers::new().
+///     set(Register::ActThs(0b1000_0000 | 5))
 ///     .build().unwrap();
 /// ```
 #[derive(Clone, Debug)]
@@ -242,7 +295,7 @@ impl Registers {
     }
 
     /// Set a list of registers.
-    pub fn set_all<'a>(&'a mut self, registers: &Vec<Register>) -> &'a mut Registers {
+    pub fn set_all<'a>(&'a mut self, registers: &[Register]) -> &'a mut Registers {
         self.registers.extend(registers);
         self
     }
@@ -261,14 +314,26 @@ impl Registers {
     /// # Example
     ///
     /// ```
-    /// assert!(false);
+    /// use lsm9ds1::config::{Registers, Register, Param, ParamType, State};
+    /// 
+    /// let conf = Registers::new().
+    ///     set(Register::ActThs(0b1000_0000 | 5))
+    ///     .build().unwrap();
+    /// match *conf.param(ParamType::ActThs).unwrap() {
+    ///     Param::ActThs(ref act_ths) => assert_eq!(*act_ths, 5),
+    ///     _ => panic!(),
+    /// };
+    /// match *conf.param(ParamType::SleepOn).unwrap() {
+    ///     Param::SleepOn(ref sleep_on) => assert_eq!(*sleep_on, State::Enable),
+    ///     _ => panic!(),
+    /// };
     /// ```
     pub fn build(&self) -> Result<Config,()> {
         let mut params = HashMap::new();
         for &reg in &self.registers {
             match reg {
                 Register::ActThs(_) => {
-                    for p in try!(reg1_to_params(reg)) {
+                    for p in try!(act_ths::from_register(reg)) {
                         params.insert(p.type_of(), p);
                     }
                 }
@@ -297,11 +362,11 @@ impl Registers {
 /// # Examples
 ///
 /// ```
-/// use lsm9ds1::config::{ConfigBuilder, Param, Registers};
+/// use lsm9ds1::config::{ConfigBuilder, Param, Registers, State};
 /// 
 /// let conf1 = ConfigBuilder::new()
-///     .set(Param::P1)
-///     .set(Param::P2)
+///     .set(Param::ActThs(5))
+///     .set(Param::SleepOn(State::Enable))
 ///     .build().unwrap();
 /// let conf2 = Registers::new().
 ///     set_all(conf1.registers())
@@ -321,13 +386,14 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfigBuilder, Param, ParamType};
+    /// use lsm9ds1::config::{ConfigBuilder, Param, ParamType, State};
     ///
     /// let c = ConfigBuilder::new()
-    ///     .set(Param::P1).set(Param::P2)
+    ///     .set(Param::ActThs(5))
+    ///     .set(Param::SleepOn(State::Enable))
     ///     .build().unwrap();
-    /// let &p = c.param(ParamType::P2).unwrap();
-    /// assert_eq!(p, Param::P2);
+    /// let &p = c.param(ParamType::ActThs).unwrap();
+    /// assert_eq!(p, Param::ActThs(5));
     /// ```
     pub fn param(&self, param: ParamType) -> Option<&Param> {
         self.params.get(&param)
@@ -338,14 +404,14 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfigBuilder, Param};
+    /// use lsm9ds1::config::{ConfigBuilder, Param, State};
     ///
     /// let c = ConfigBuilder::new()
-    ///     .set(Param::P1)
-    ///     .set(Param::P2)
+    ///     .set(Param::ActThs(5))
+    ///     .set(Param::SleepOn(State::Enable))
     ///     .build().unwrap();
     /// for &p in c.params() {
-    ///     assert!(p == Param::P1 || p == Param::P2);
+    ///     assert!(p == Param::ActThs(5) || p == Param::SleepOn(State::Enable));
     /// }
     /// ```
     pub fn params(&self) -> Vec<&Param> {
@@ -358,17 +424,17 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfigBuilder, Param, Register};
+    /// use lsm9ds1::config::{ConfigBuilder, Param, Register, RegisterType, State};
     ///
     /// let c = ConfigBuilder::new()
-    ///     .set(Param::P1)
-    ///     .set(Param::P2)
+    ///     .set(Param::ActThs(5))
+    ///     .set(Param::SleepOn(State::Enable))
     ///     .build().unwrap();
     /// for &r in c.registers() {
-    ///     assert_eq!(r, Register::R1);
+    ///     assert_eq!(r.type_of(), RegisterType::ActThs);
     /// }
     /// ```
-    pub fn registers(&self) -> &Vec<Register> {
+    pub fn registers(&self) -> &[Register] {
         &self.registers
     }
 }
@@ -384,11 +450,11 @@ mod tests {
             .set(Param::ActThs(5))
             .set(Param::SleepOn(State::Enable))
             .build().unwrap();
-        // let conf2 = Registers::new().
-        //     set_all(conf1.registers())
-        //     .build().unwrap();
+        let conf2 = Registers::new().
+            set_all(conf1.registers())
+            .build().unwrap();
 
-        // assert_eq!(conf1, conf2);
+        assert_eq!(conf1, conf2);
         
             
     }
