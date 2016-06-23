@@ -13,9 +13,6 @@ pub enum AndOrState {
     And,
     Or,
 }
-// pub trait TypeOf {
-//     pub 
-// }
 
 macro_rules! enum_with_type {
     ( $(#[$Eattr:meta])* enum $E:ident,
@@ -23,13 +20,11 @@ macro_rules! enum_with_type {
         $($(#[$eattr:meta])* variant $e:ident => $et:ty ),+
             $(,)*
     }) => {
-        // #[derive(Clone, Copy, Debug, PartialEq, Eq)]
         $(#[$Eattr])*
         pub enum $E {
             $($(#[$eattr])* $e($et)),+
         }
         
-        // #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
         $(#[$ETattr])*
         pub enum $ET {
             $($e),+
@@ -111,10 +106,12 @@ pub mod act_ths {
     const ACT_THS_MASK:  u8 = 0b0111_1111;
     const SLEEP_ON_MASK: u8 = 0b1000_0000;
 
-    /// from params return a register with defaut values or values
+    /// From params return a register with defaut values or values
     /// given in the param or error.
     /// 
-    /// Defaut value is 
+    /// If all parameters are not supplies, defaut values are:
+    /// * `Param::ActThs(0)`
+    /// * `Param::SleepOn(State::Disable)`
     pub fn from_params(params: &[Param]) -> Result<Register,()> {
         let mut reg: u8 = 0x00;     // Default is 0.
         for &param in params {
@@ -201,13 +198,12 @@ impl ConfigBuilder {
 
     /// Build a `Config` from a `ConfigBuilder`.
     ///
+    /// If the same parameter is set multiple times, with different
+    /// values, the last one is used.
+    ///
     /// # Errors
     ///
-    /// `build()` may failed if:
-    ///
-    /// * 2 parameters have the same type but differents values or;
-    ///
-    /// * if a parameter is not compatible with the *LSM9DS1*
+    /// `build()` may failed if a parameter is not compatible with the *LSM9DS1*
     /// specification.
     ///
     /// # Example
@@ -224,12 +220,7 @@ impl ConfigBuilder {
         let mut hash_reg = HashMap::new();
         let mut hash_param = HashMap::new();
         for &p in &self.params {
-            let old = hash_param.insert(p.type_of(), p);
-            // Check if the duplicated param is identique:
-            match old {
-                None => {}
-                Some(old_p) => if old_p != p {return Err(())} // If not, it's an error. TODO: explain error.
-            }
+            hash_param.insert(p.type_of(), p);
             match p {
                 Param::ActThs(_) => {
                     let params = hash_reg.entry(RegisterType::ActThs).or_insert(Vec::new());
@@ -240,20 +231,12 @@ impl ConfigBuilder {
                     params.push(p);
                 }
                 _ => unimplemented!(),
-                // Param::P1 | Param::P2 | Param::P3(_) => {
-                //     let params = hash_reg.entry(RegisterType::R1).or_insert(Vec::new());
-                //     params.push(p);
-                // }
             }
         }
 
         let mut registers = Vec::new();
         for (key, params) in hash_reg.iter() {
-            // unimplemented!();
             registers.push(try!(key.from_params(params)));
-            // match *key {
-            //     RegisterType::ActThs => registers.push(try!(reg1_from_params(params)))
-            // }
         }
 
         Ok(Config {
