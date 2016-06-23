@@ -158,45 +158,45 @@ mod act_dur {
 }
 
 
-/// `ConfigBuilder` is use to create a partial or total new configuration of
+/// `ConfParamBuilder` is use to create a partial or total new configuration of
 /// a *LSM9DS1*.
 /// 
 /// # Examples
 ///
 /// ```
-/// use lsm9ds1::config::{ConfigBuilder, Param, State};
+/// use lsm9ds1::config::{ConfParamBuilder, Param, State};
 /// 
-/// let conf1 = ConfigBuilder::new()
+/// let conf1 = ConfParamBuilder::new()
 ///     .set(Param::ActThs(5))
 ///     .set(Param::SleepOn(State::Enable))
 ///     .build().unwrap();
 /// ```
 #[derive(Clone, Debug)]
-pub struct ConfigBuilder {
+pub struct ConfParamBuilder {
     params: Vec<Param>,
 }
 
-impl ConfigBuilder {
-    /// `ConfigBuilder::new()` create a new emtpy `ConfigBuilder`.
-    pub fn new() -> ConfigBuilder {
-        ConfigBuilder {
+impl ConfParamBuilder {
+    /// `ConfParamBuilder::new()` create a new emtpy `ConfParamBuilder`.
+    pub fn new() -> ConfParamBuilder {
+        ConfParamBuilder {
             params: Vec::new(),
         }
     }
 
     /// Set a specific parameter.
-    pub fn set<'a>(&'a mut self, param: Param) -> &'a mut ConfigBuilder {
+    pub fn set<'a>(&'a mut self, param: Param) -> &'a mut ConfParamBuilder {
         self.params.push(param);
         self
     }
 
     /// Set a list of parameters.
-    pub fn set_all<'a>(&'a mut self, params: &[Param]) -> &'a mut ConfigBuilder {
+    pub fn set_all<'a>(&'a mut self, params: &[Param]) -> &'a mut ConfParamBuilder {
         self.params.extend(params);
         self
     }
 
-    /// Build a `Config` from a `ConfigBuilder`.
+    /// Build a `Config` from a `ConfParamBuilder`.
     ///
     /// If the same parameter is set multiple times, with different
     /// values, the last one is used.
@@ -209,9 +209,9 @@ impl ConfigBuilder {
     /// # Example
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfigBuilder, Param, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param, State};
     /// 
-    /// let conf1 = ConfigBuilder::new()
+    /// let conf1 = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
     ///     .set(Param::SleepOn(State::Enable))
     ///     .build().unwrap();
@@ -252,38 +252,38 @@ impl ConfigBuilder {
 /// # Examples
 ///
 /// ```
-/// use lsm9ds1::config::{Registers, Register};
+/// use lsm9ds1::config::{ConfRegBuilder, Register};
 /// 
-/// let conf = Registers::new().
+/// let conf = ConfRegBuilder::new().
 ///     set(Register::ActThs(0b1000_0000 | 5))
 ///     .build().unwrap();
 /// ```
 #[derive(Clone, Debug)]
-pub struct Registers {
+pub struct ConfRegBuilder {
     registers: Vec<Register>,
 }
 
-impl Registers {
-    /// `ConfigBuilder::new()` create a new emtpy `ConfigBuilder`.
-    pub fn new() -> Registers {
-        Registers {
+impl ConfRegBuilder {
+    /// `ConfParamBuilder::new()` create a new emtpy `ConfParamBuilder`.
+    pub fn new() -> ConfRegBuilder {
+        ConfRegBuilder {
             registers: Vec::new(),
         }
     }
 
     /// Set a specific register.
-    pub fn set<'a>(&'a mut self, register: Register) -> &'a mut Registers {
+    pub fn set<'a>(&'a mut self, register: Register) -> &'a mut ConfRegBuilder {
         self.registers.push(register);
         self
     }
 
     /// Set a list of registers.
-    pub fn set_all<'a>(&'a mut self, registers: &[Register]) -> &'a mut Registers {
+    pub fn set_all<'a>(&'a mut self, registers: &[Register]) -> &'a mut ConfRegBuilder {
         self.registers.extend(registers);
         self
     }
 
-    /// Build a `Config` from a `Registers`.
+    /// Build a `Config` from a `ConfRegBuilder`.
     ///
     /// # Errors
     ///
@@ -297,9 +297,9 @@ impl Registers {
     /// # Example
     ///
     /// ```
-    /// use lsm9ds1::config::{Registers, Register, Param, ParamType, State};
+    /// use lsm9ds1::config::{ConfRegBuilder, Register, Param, ParamType, State};
     /// 
-    /// let conf = Registers::new().
+    /// let conf = ConfRegBuilder::new().
     ///     set(Register::ActThs(0b1000_0000 | 5))
     ///     .build().unwrap();
     /// match *conf.param(ParamType::ActThs).unwrap() {
@@ -339,19 +339,19 @@ impl Registers {
 /// * a set of registers value, with `Register`: It's useful if you
 /// want to decode the config read from a *LSM9DS1* device.
 ///
-/// * or from a set of values, with `ConfigBuilder`: It's useful if
+/// * or from a set of values, with `ConfParamBuilder`: It's useful if
 /// you want to encode a configuration to a *LSM9DS1* device.
 ///
 /// # Examples
 ///
 /// ```
-/// use lsm9ds1::config::{ConfigBuilder, Param, Registers, State};
+/// use lsm9ds1::config::{ConfParamBuilder, Param, ConfRegBuilder, State};
 /// 
-/// let conf1 = ConfigBuilder::new()
+/// let conf1 = ConfParamBuilder::new()
 ///     .set(Param::ActThs(5))
 ///     .set(Param::SleepOn(State::Enable))
 ///     .build().unwrap();
-/// let conf2 = Registers::new().
+/// let conf2 = ConfRegBuilder::new().
 ///     set_all(conf1.registers())
 ///     .build().unwrap();
 /// 
@@ -369,9 +369,9 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfigBuilder, Param, ParamType, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param, ParamType, State};
     ///
-    /// let c = ConfigBuilder::new()
+    /// let c = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
     ///     .set(Param::SleepOn(State::Enable))
     ///     .build().unwrap();
@@ -387,9 +387,9 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfigBuilder, Param, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param, State};
     ///
-    /// let c = ConfigBuilder::new()
+    /// let c = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
     ///     .set(Param::SleepOn(State::Enable))
     ///     .build().unwrap();
@@ -407,9 +407,9 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfigBuilder, Param, Register, RegisterType, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param, Register, RegisterType, State};
     ///
-    /// let c = ConfigBuilder::new()
+    /// let c = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
     ///     .set(Param::SleepOn(State::Enable))
     ///     .build().unwrap();
@@ -424,16 +424,16 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use super::{ConfigBuilder, Registers, Param, State};
+    use super::{ConfParamBuilder, ConfRegBuilder, Param, State};
     // use params::Param;
     
     #[test]
     fn it_works() {
-        let conf1 = ConfigBuilder::new()
+        let conf1 = ConfParamBuilder::new()
             .set(Param::ActThs(5))
             .set(Param::SleepOn(State::Enable))
             .build().unwrap();
-        let conf2 = Registers::new().
+        let conf2 = ConfRegBuilder::new().
             set_all(conf1.registers())
             .build().unwrap();
 
