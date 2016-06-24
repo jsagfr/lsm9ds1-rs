@@ -2,7 +2,7 @@ macro_rules! int_gen_ths_xl {
     ($x:ident) => {
         use super::super::{Register, Param};
 
-        fn from_params(params: &[Param]) -> Result<Register,()> {
+        pub fn from_params(params: &[Param]) -> Result<Register,()> {
             let mut reg = 0x00;
             for &param in params {
                 match param {

@@ -10,7 +10,7 @@ const XHIE_XL:   u8 = 0b00000010;
 const XLIE_XL:   u8 = 0b00000001;
 
 
-fn from_params(params: &[Param]) -> Result<Register,()> {
+pub fn from_params(params: &[Param]) -> Result<Register,()> {
     let mut reg = 0x00;
     for &param in params {
         match param {

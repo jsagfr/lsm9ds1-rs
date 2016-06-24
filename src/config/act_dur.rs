@@ -1,6 +1,6 @@
 use super::{Register, Param};
 
-fn from_params(params: &[Param]) -> Result<Register,()> {
+pub fn from_params(params: &[Param]) -> Result<Register,()> {
     let mut reg = 0x00;
     for &param in params {
         match param {
