@@ -6,21 +6,6 @@ pub mod act_ths;
 pub mod act_dur;
 pub mod int_gen_cfg_xl;
 pub mod int_gen_ths_xl;
-// pub mod int_gen_ths_y_xl;
-// pub mod int_gen_ths_z_xl;
-
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum State {
-    Enable,
-    Disable,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum AndOrState {
-    And,
-    Or,
-}
 
 macro_rules! enum_with_type {
     ( $(#[$Eattr:meta])* enum $E:ident,
@@ -66,7 +51,7 @@ enum_with_type!{
         /// Gyroscope operating mode during inactivity.
         ///
         /// * Default value is `Disable`
-        variant SleepOn => State,
+        variant SleepOn => bool,
         /// Gyroscope inactivity duration.
         ///
         /// __TODO: Question: is accelerometer concerned?__
@@ -77,14 +62,14 @@ enum_with_type!{
         /// AND/OR combination of accelerometer's interrupt events.
         /// 
         /// * Default value: `Or`
-        variant AoiXl => AndOrState,
-        variant Detect6D => State,
-        variant ZhieXl => State,
-        variant ZlieXl => State,
-        variant YhieXl => State,
-        variant YlieXl => State,
-        variant XhieXl => State,
-        variant XlieXl => State,
+        variant AoiXl => bool,
+        variant Detect6D => bool,
+        variant ZhieXl => bool,
+        variant ZlieXl => bool,
+        variant YhieXl => bool,
+        variant YlieXl => bool,
+        variant XhieXl => bool,
+        variant XlieXl => bool,
         variant IntGenThsXXl => u8,
         variant IntGenThsYXl => u8,
         variant IntGenThsZXl => u8,
@@ -121,11 +106,11 @@ impl RegisterType {
 /// # Examples
 ///
 /// ```
-/// use lsm9ds1::config::{ConfParamBuilder, Param, State};
+/// use lsm9ds1::config::{ConfParamBuilder, Param};
 /// 
 /// let conf1 = ConfParamBuilder::new()
 ///     .set(Param::ActThs(5))
-///     .set(Param::SleepOn(State::Enable))
+///     .set(Param::SleepOn(true))
 ///     .build().unwrap();
 /// ```
 #[derive(Clone, Debug)]
@@ -166,11 +151,11 @@ impl ConfParamBuilder {
     /// # Example
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfParamBuilder, Param, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param};
     /// 
     /// let conf1 = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
-    ///     .set(Param::SleepOn(State::Enable))
+    ///     .set(Param::SleepOn(true))
     ///     .build().unwrap();
     /// ```
     pub fn build(&self) -> Result<Config,()> {
@@ -254,7 +239,7 @@ impl ConfRegBuilder {
     /// # Example
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfRegBuilder, Register, Param, ParamType, State};
+    /// use lsm9ds1::config::{ConfRegBuilder, Register, Param, ParamType};
     /// 
     /// let conf = ConfRegBuilder::new().
     ///     set(Register::ActThs(0b1000_0000 | 5))
@@ -264,7 +249,7 @@ impl ConfRegBuilder {
     ///     _ => panic!(),
     /// };
     /// match *conf.param(ParamType::SleepOn).unwrap() {
-    ///     Param::SleepOn(ref sleep_on) => assert_eq!(*sleep_on, State::Enable),
+    ///     Param::SleepOn(ref sleep_on) => assert_eq!(*sleep_on, true),
     ///     _ => panic!(),
     /// };
     /// ```
@@ -302,11 +287,11 @@ impl ConfRegBuilder {
 /// # Examples
 ///
 /// ```
-/// use lsm9ds1::config::{ConfParamBuilder, Param, ConfRegBuilder, State};
+/// use lsm9ds1::config::{ConfParamBuilder, Param, ConfRegBuilder};
 /// 
 /// let conf1 = ConfParamBuilder::new()
 ///     .set(Param::ActThs(5))
-///     .set(Param::SleepOn(State::Enable))
+///     .set(Param::SleepOn(true))
 ///     .build().unwrap();
 /// let conf2 = ConfRegBuilder::new().
 ///     set_all(conf1.registers())
@@ -326,11 +311,11 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfParamBuilder, Param, ParamType, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param, ParamType};
     ///
     /// let c = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
-    ///     .set(Param::SleepOn(State::Enable))
+    ///     .set(Param::SleepOn(true))
     ///     .build().unwrap();
     /// let &p = c.param(ParamType::ActThs).unwrap();
     /// assert_eq!(p, Param::ActThs(5));
@@ -344,14 +329,14 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfParamBuilder, Param, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param};
     ///
     /// let c = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
-    ///     .set(Param::SleepOn(State::Enable))
+    ///     .set(Param::SleepOn(true))
     ///     .build().unwrap();
     /// for &p in c.params() {
-    ///     assert!(p == Param::ActThs(5) || p == Param::SleepOn(State::Enable));
+    ///     assert!(p == Param::ActThs(5) || p == Param::SleepOn(true));
     /// }
     /// ```
     pub fn params(&self) -> Vec<&Param> {
@@ -364,11 +349,11 @@ impl Config {
     /// # Examples
     ///
     /// ```
-    /// use lsm9ds1::config::{ConfParamBuilder, Param, Register, RegisterType, State};
+    /// use lsm9ds1::config::{ConfParamBuilder, Param, Register, RegisterType};
     ///
     /// let c = ConfParamBuilder::new()
     ///     .set(Param::ActThs(5))
-    ///     .set(Param::SleepOn(State::Enable))
+    ///     .set(Param::SleepOn(true))
     ///     .build().unwrap();
     /// for &r in c.registers() {
     ///     assert_eq!(r.type_of(), RegisterType::ActThs);
@@ -381,14 +366,13 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use super::{ConfParamBuilder, ConfRegBuilder, Param, State};
-    // use params::Param;
+    use super::{ConfParamBuilder, ConfRegBuilder, Param};
     
     #[test]
     fn it_works() {
         let conf1 = ConfParamBuilder::new()
             .set(Param::ActThs(5))
-            .set(Param::SleepOn(State::Enable))
+            .set(Param::SleepOn(true))
             .build().unwrap();
         let conf2 = ConfRegBuilder::new().
             set_all(conf1.registers())

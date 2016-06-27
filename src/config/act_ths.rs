@@ -1,4 +1,4 @@
-use super::{Register, Param, State};
+use super::{Register, Param};
 
 const ACT_THS_MASK:  u8 = 0b0111_1111;
 const SLEEP_ON_MASK: u8 = 0b1000_0000;
@@ -20,9 +20,10 @@ pub fn from_params(params: &[Param]) -> Result<Register,()> {
                     _ => return Err(()),
                 }
             }
-            Param::SleepOn(x) => match x {
-                State::Enable =>  reg |=  SLEEP_ON_MASK,
-                State::Disable => reg &= !SLEEP_ON_MASK,
+            Param::SleepOn(x) => reg = if x {
+                reg |  SLEEP_ON_MASK
+            } else {
+                reg & !SLEEP_ON_MASK
             },
             _ => return Err(()),
         }
@@ -38,11 +39,7 @@ pub fn from_params(params: &[Param]) -> Result<Register,()> {
 pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
     match reg {
         Register::ActThs(r) => {
-            let sleep_on = match r & SLEEP_ON_MASK {
-                SLEEP_ON_MASK => Param::SleepOn(State::Enable),
-                0 => Param::SleepOn(State::Enable),
-                _ => unreachable!(),
-            };
+            let sleep_on = Param::SleepOn(r & SLEEP_ON_MASK == SLEEP_ON_MASK);
             let act_ths = Param::ActThs(r & ACT_THS_MASK);
             Ok(vec![sleep_on, act_ths])
         }
