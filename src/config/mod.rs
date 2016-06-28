@@ -2,10 +2,16 @@
 use std::collections::HashMap;
 use std::iter::Iterator;
 
+#[macro_use]
+mod macros;
+
 pub mod act_ths;
 pub mod act_dur;
 pub mod int_gen_cfg_xl;
-pub mod int_gen_ths_xl;
+pub mod int_gen_ths_x_xl;
+pub mod int_gen_ths_y_xl;
+pub mod int_gen_ths_z_xl;
+pub mod int_gen_dur_xl;
 pub mod reference_g;
 pub mod int1_ctrl;
 pub mod int2_ctrl;
@@ -37,32 +43,6 @@ pub mod ctrl_reg5_m;
 pub mod int_cfg_m;
 
 
-
-macro_rules! enum_with_type {
-    ( $(#[$Eattr:meta])* enum $E:ident,
-      $(#[$ETattr:meta])* enum_type $ET:ident {
-        $($(#[$eattr:meta])* variant $e:ident => $et:ty ),+
-            $(,)*
-    }) => {
-        $(#[$Eattr])*
-        pub enum $E {
-            $($(#[$eattr])* $e($et)),+
-        }
-        
-        $(#[$ETattr])*
-        pub enum $ET {
-            $($e),+
-        }
-
-        impl $E {
-            pub fn type_of(self: $E) -> $ET {
-                match self {
-                    $( $E::$e(_) => $ET::$e, )+
-                }
-            }
-        }
-    }
-}
 
 enum_with_type!{
     /// Parameters used to configure or given when reading a
@@ -104,6 +84,37 @@ enum_with_type!{
         variant IntGenThsXXl => u8,
         variant IntGenThsYXl => u8,
         variant IntGenThsZXl => u8,
+
+        variant WaitXl => bool,
+        /// Linear acceleration sensor interrupt duration.
+        variant DurXl => u8,
+
+        variant ReferenceG => u8,
+
+        // Int1Ctrl register
+        variant Int1IgG => bool,
+        variant Int1IgXl => bool,
+        variant Int1Fss5 => bool,
+        variant Int1Ovr => bool,
+        variant Int1Fth => bool,
+        variant Int1Boot => bool,
+        variant Int1DrdyG => bool,
+        variant Int1DrdyXl => bool,
+
+        // Int2Ctrl register:
+        variant Int2Inact => bool,
+        variant Int2Fss5 => bool,
+        variant Int2Ovr => bool,
+        variant Int2Fth => bool,
+        variant Int2DrdyTemp => bool,
+        variant Int2DrdyG => bool,
+        variant Int2DrdyXl => bool,
+
+        
+        variant WaitG => bool,
+        variant DurG => u8,
+
+
     }
 }
 
@@ -149,7 +160,6 @@ enum_with_type!{
         variant CtrlReg4M => u8,
         variant CtrlReg5M => u8,
         variant IntCfgM => u8,
-
         
     }
 }

@@ -1,5 +1,3 @@
-use super::{Register, Param};
-
 const AOI_XL:    u8 = 0b10000000;
 const DETECT_6D: u8 = 0b01000000;
 const ZHIE_XL:   u8 = 0b00100000;
@@ -10,72 +8,17 @@ const XHIE_XL:   u8 = 0b00000010;
 const XLIE_XL:   u8 = 0b00000001;
 
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg = 0x00;
-    for &param in params {
-        match param {
-            Param::AoiXl(x) => reg = if x {
-                reg | AOI_XL
-            } else {
-                reg & !AOI_XL
-            },
-            Param::Detect6D(x) => reg = if x {
-                reg | DETECT_6D
-            } else {
-                reg & !DETECT_6D
-            },
-            Param::ZhieXl(x) => reg = if x {
-                reg | ZHIE_XL
-            } else {
-                reg & !ZHIE_XL
-            },
-            Param::ZlieXl(x) => reg = if x {
-                reg | ZLIE_XL
-            } else {
-                reg & !ZLIE_XL
-            },
-            Param::YhieXl(x) => reg = if x {
-                reg | YHIE_XL
-            } else {
-                reg & !YHIE_XL
-            },
-            Param::YlieXl(x) => reg = if x {
-                reg | YLIE_XL
-            } else {
-                reg & !YLIE_XL
-            },
-            Param::XhieXl(x) => reg = if x {
-                reg | XHIE_XL
-            } else {
-                reg & !XHIE_XL
-            },
-            Param::XlieXl(x) => reg = if x {
-                reg | XLIE_XL
-            } else {
-                reg & !XLIE_XL
-            },
-            _ => return Err(()),
-        }
+reg_is_bools!{
+    IntGenCfgXl => {
+        AoiXl : AOI_XL,
+        Detect6D : DETECT_6D,
+        ZhieXl : ZHIE_XL,
+        ZlieXl : ZLIE_XL,
+        YhieXl : YHIE_XL,
+        YlieXl : YLIE_XL,
+        XhieXl : XHIE_XL,
+        XlieXl : XLIE_XL,
     }
-    Ok(Register::IntGenCfgXl(reg))
-}
-
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    let mut params = vec![];
-    match reg {
-        Register::IntGenCfgXl(r) => {
-            params.push(Param::AoiXl(r & AOI_XL == AOI_XL));
-            params.push(Param::Detect6D(r & DETECT_6D == DETECT_6D));
-            params.push(Param::ZhieXl(r & ZHIE_XL == ZHIE_XL));
-            params.push(Param::ZlieXl(r & ZLIE_XL == ZLIE_XL));
-            params.push(Param::YhieXl(r & YHIE_XL == YHIE_XL));
-            params.push(Param::YlieXl(r & YLIE_XL == YLIE_XL));
-            params.push(Param::XhieXl(r & XHIE_XL == XHIE_XL));
-            params.push(Param::XlieXl(r & XLIE_XL == XLIE_XL));
-        }
-        _ => return Err(()),
-    }
-    Ok(params)
 }
 
 #[cfg(test)]
