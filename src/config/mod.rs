@@ -6,6 +6,37 @@ pub mod act_ths;
 pub mod act_dur;
 pub mod int_gen_cfg_xl;
 pub mod int_gen_ths_xl;
+pub mod reference_g;
+pub mod int1_ctrl;
+pub mod int2_ctrl;
+pub mod ctrl_reg1_g;
+pub mod ctrl_reg2_g;
+pub mod ctrl_reg3_g;
+pub mod orient_cfg_g;
+pub mod ctrl_reg4;
+pub mod ctrl_reg5_xl;
+pub mod ctrl_reg6_xl;
+pub mod ctrl_reg7_xl;
+pub mod ctrl_reg8;
+pub mod ctrl_reg9;
+pub mod ctrl_reg10;
+pub mod fifo_ctrl;
+pub mod int_gen_cfg_g;
+pub mod int_gen_ths_x_g;
+pub mod int_gen_ths_y_g;
+pub mod int_gen_ths_z_g;
+pub mod int_gen_dur_g;
+pub mod offset_x_reg_m;
+pub mod offset_y_reg_m;
+pub mod offset_z_reg_m;
+pub mod ctrl_reg1_m;
+pub mod ctrl_reg2_m;
+pub mod ctrl_reg3_m;
+pub mod ctrl_reg4_m;
+pub mod ctrl_reg5_m;
+pub mod int_cfg_m;
+
+
 
 macro_rules! enum_with_type {
     ( $(#[$Eattr:meta])* enum $E:ident,
@@ -88,6 +119,38 @@ enum_with_type!{
         variant IntGenThsXXl => u8,
         variant IntGenThsYXl => u8,
         variant IntGenThsZXl => u8,
+        variant IntGenDurXl => u8,
+        variant ReferenceG => u8,
+        variant Int1Ctrl => u8,
+        variant Int2Ctrl => u8,
+        variant CtrlReg1G => u8,
+        variant CtrlReg2G => u8,
+        variant CtrlReg3G => u8,
+        variant OrientCfgG => u8,
+        variant CtrlReg4 => u8,
+        variant CtrlReg5Xl => u8,
+        variant CtrlReg6Xl => u8,
+        variant CtrlReg7Xl => u8,
+        variant CtrlReg8 => u8,
+        variant CtrlReg9 => u8,
+        variant CtrlReg10 => u8,
+        variant FifoCtrl => u8,
+        variant IntGenCfgG => u8,
+        variant IntGenThsXG => u16,
+        variant IntGenThsYG => u16,
+        variant IntGenThsZG => u16,
+        variant IntGenDurG => u8,
+        variant OffsetXRegM => u16,
+        variant OffsetYRegM => u16,
+        variant OffsetZRegM => u16,
+        variant CtrlReg1M => u8,
+        variant CtrlReg2M => u8,
+        variant CtrlReg3M => u8,
+        variant CtrlReg4M => u8,
+        variant CtrlReg5M => u8,
+        variant IntCfgM => u8,
+
+        
     }
 }
 
