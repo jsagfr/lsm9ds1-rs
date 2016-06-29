@@ -42,7 +42,44 @@ pub mod ctrl_reg4_m;
 pub mod ctrl_reg5_m;
 pub mod int_cfg_m;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DataRate {
+    NA,
+    PowerDown,
+    DR15Hz,
+    DR59Hz,
+    DR119Hz,
+    DR238Hz,
+    DR476Hz,
+    DR952Hz,
+}
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GyroScale {
+    NA,
+    FS245Dps,
+    FS500Dps,
+    FS2000Dps,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BwG {
+    A,
+    B,
+    C,
+    D,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Cutoff {
+    NA,
+    C5Hz,
+    C19Hz,
+    C38Hz,
+    C76Hz,
+    C100Hz,
+    CHz,
+}
 
 enum_with_type!{
     /// Parameters used to configure or given when reading a
@@ -110,6 +147,10 @@ enum_with_type!{
         variant Int2DrdyG => bool,
         variant Int2DrdyXl => bool,
 
+        // CtrlReg1
+        variant OdrG => DataRate,
+        variant FsG => GyroScale,
+        variant BwG => BwG,
 
         // CtrlReg4
         variant ZenG => bool,
