@@ -110,7 +110,37 @@ enum_with_type!{
         variant Int2DrdyG => bool,
         variant Int2DrdyXl => bool,
 
-        
+
+        // CtrlReg4
+        variant ZenG => bool,
+        variant YenG => bool,
+        variant XenG => bool,
+        variant LirXl1 => bool,
+        variant I4dXl1 => bool,
+
+        // CtrlReg8
+        variant Boot => bool,
+        variant Bdu => bool,
+        variant HLactive => bool,
+        variant PpOd => bool,
+        variant Sim => bool,
+        variant IfAddInc => bool,
+        variant Ble => bool,
+        variant SwReset => bool,
+
+        // CtrlReg9
+        variant SleepG => bool,
+        variant FifoTempEn => bool,
+        variant DrdyMaskBit => bool,
+        variant I2cDisable => bool,
+        variant FifoEn => bool,
+        variant StopOnFth => bool,
+
+        // CtrlReg10
+        variant StG => bool,
+        variant StXl => bool,
+
+        // INT_GEN_DUR_G
         variant WaitG => bool,
         variant DurG => u8,
 

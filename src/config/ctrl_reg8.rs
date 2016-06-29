@@ -1,13 +1,24 @@
-use super::{Register, Param};
+const BOOT:       u8 = 0b10000000;
+const BDU:        u8 = 0b01000000;
+const H_LACTIVE:  u8 = 0b00100000;
+const PP_OD:      u8 = 0b00010000;
+const SIM:        u8 = 0b00001000;
+const IF_ADD_INC: u8 = 0b00000100;
+const BLE:        u8 = 0b00000010;
+const SW_RESET:   u8 = 0b00000001;
 
-#[allow(unused_variables)]
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    unimplemented!();
-}
 
-#[allow(unused_variables)]
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    unimplemented!();
+reg_is_bools!{
+    CtrlReg8 => {
+        Boot : BOOT,
+        Bdu : BDU,
+        HLactive : H_LACTIVE,
+        PpOd : PP_OD,
+        Sim : SIM,
+        IfAddInc : IF_ADD_INC,
+        Ble : BLE,
+        SwReset : SW_RESET,
+    }
 }
 
 #[cfg(test)]
@@ -17,7 +28,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let r1 = Register::ReferenceG(0x1A);
+        let r1 = Register::CtrlReg8(0x1A);
         let r2 = from_params(&from_register(r1).unwrap()).unwrap();
         assert_eq!(r1, r2);
     }
