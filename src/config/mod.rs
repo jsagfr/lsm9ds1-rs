@@ -62,6 +62,7 @@ pub enum GyroScale {
     FS2000Dps,
 }
 
+/// Clarifications needed
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BwG {
     A,
@@ -70,6 +71,7 @@ pub enum BwG {
     D,
 }
 
+/// Clarifications needed
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Cutoff {
     NA,
@@ -79,6 +81,32 @@ pub enum Cutoff {
     C76Hz,
     C100Hz,
     CHz,
+}
+
+/// Clarifications needed
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IntSel {
+    A,
+    B,
+    C,
+    D,
+}
+
+/// Clarifications needed
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OutSel {
+    A,
+    B,
+    C,
+    D,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Dec {
+    NoDec,
+    Dec2S,
+    Dec4S,
+    Dec8S,
 }
 
 enum_with_type!{
@@ -147,10 +175,27 @@ enum_with_type!{
         variant Int2DrdyG => bool,
         variant Int2DrdyXl => bool,
 
-        // CtrlReg1
+        // CtrlReg1G
         variant OdrG => DataRate,
         variant FsG => GyroScale,
         variant BwG => BwG,
+
+        // CtrlReg2G
+        variant IntSel => IntSel,
+        variant OutSel => OutSel,
+
+        // CtrlReg3G
+        variant LPMode => bool,
+        variant HpEn => bool,
+        variant HpcfG => u8,
+
+        // OrientCfgG
+        variant SignXG => bool,
+        variant SignYG => bool,
+        variant SignZG => bool,
+        /// Carification needed for Orient which is probably not a
+        /// simple u3...
+        variant Orient => u8,
 
         // CtrlReg4
         variant ZenG => bool,
@@ -159,6 +204,12 @@ enum_with_type!{
         variant LirXl1 => bool,
         variant I4dXl1 => bool,
 
+        // CtrlReg5XL
+        variant ZenXl => bool,
+        variant YenXl => bool,
+        variant XenXl => bool,
+        variant Dec => Dec,
+            
         // CtrlReg8
         variant Boot => bool,
         variant Bdu => bool,
