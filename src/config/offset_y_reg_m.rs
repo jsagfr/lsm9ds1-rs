@@ -1,14 +1,4 @@
-use super::{Register, Param};
-
-#[allow(unused_variables)]
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    unimplemented!();
-}
-
-#[allow(unused_variables)]
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    unimplemented!();
-}
+reg_is_param!(OffsetYRegM);
 
 #[cfg(test)]
 mod tests {
@@ -17,7 +7,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let r1 = Register::ReferenceG(0x1A);
+        let r1 = Register::OffsetYRegM(0x1A1A);
         let r2 = from_params(&from_register(r1).unwrap()).unwrap();
         assert_eq!(r1, r2);
     }

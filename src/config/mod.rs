@@ -232,7 +232,16 @@ enum_with_type!{
         variant StG => bool,
         variant StXl => bool,
 
-        // INT_GEN_DUR_G
+        // OffsetXRegM
+        variant OffsetXRegM => u16,
+
+        // OffsetYRegM
+        variant OffsetYRegM => u16,
+        
+        // OffsetZRegM
+        variant OffsetZRegM => u16,
+
+        // int_gen_dur_g
         variant WaitG => bool,
         variant DurG => u8,
 
