@@ -1,13 +1,26 @@
-use super::{Register, Param};
+const XIEN:   u8 = 0b10000000;
+const YIEN:   u8 = 0b01000000;
+const ZIEN:   u8 = 0b00100000;
+const ERROR1: u8 = 0b00010000;
+const ERROR2: u8 = 0b00001000;
+const IEA:    u8 = 0b00000100;
+const IEL:    u8 = 0b00000010;
+const IEN:    u8 = 0b00000001;
 
-#[allow(unused_variables)]
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    unimplemented!();
-}
 
-#[allow(unused_variables)]
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    unimplemented!();
+reg_is_bools!{
+    IntCfgM => {
+        Xien : XIEN,
+        Yien : YIEN,
+        Zien : ZIEN,
+        Iea : IEA,
+        Iel : IEL,
+        Ien : IEN,
+    }
+    bits_errors {
+        ERROR1,
+        ERROR2,
+    }
 }
 
 #[cfg(test)]
@@ -17,7 +30,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let r1 = Register::ReferenceG(0x1A);
+        let r1 = Register::IntCfgM(0b111_00_111);
         let r2 = from_params(&from_register(r1).unwrap()).unwrap();
         assert_eq!(r1, r2);
     }

@@ -1,7 +1,7 @@
 use super::{Register, Param};
 
 const ERRORS_MASK: u8 = 0b11_000_000;
-const SIGN_X_G:    u8 = 0b11_100_000;
+const SIGN_X_G:    u8 = 0b00_100_000;
 const SIGN_Y_G:    u8 = 0b00_010_000;
 const SIGN_Z_G:    u8 = 0b00_001_000;
 const ORIENT_MASK: u8 = 0b00_000_111;
@@ -46,8 +46,8 @@ pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
             if r & ERRORS_MASK != 0 {
                 return Err(())
             };
-            params.push(Param::SignXG(r & SIGN_Z_G == SIGN_Z_G));
-            params.push(Param::SignYG(r & SIGN_Z_G == SIGN_Y_G));
+            params.push(Param::SignXG(r & SIGN_X_G == SIGN_X_G));
+            params.push(Param::SignYG(r & SIGN_Y_G == SIGN_Y_G));
             params.push(Param::SignZG(r & SIGN_Z_G == SIGN_Z_G));
             params.push(Param::Orient(r & ORIENT_MASK));
         }
@@ -63,7 +63,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let r1 = Register::OrientCfgG(0x1A);
+        let r1 = Register::OrientCfgG(0b00_101_011);
         let r2 = from_params(&from_register(r1).unwrap()).unwrap();
         assert_eq!(r1, r2);
     }

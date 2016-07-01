@@ -109,6 +109,16 @@ pub enum Dec {
     Dec8S,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FMode {
+    ByPass,
+    StopIfFull,
+    ContinusTrig,
+    ByPassTrig,
+    Overwrite,
+}
+
+
 enum_with_type!{
     /// Parameters used to configure or given when reading a
     /// *LSM9DS1*.
@@ -209,7 +219,10 @@ enum_with_type!{
         variant YenXl => bool,
         variant XenXl => bool,
         variant Dec => Dec,
-            
+
+        // CtrlReg6XL
+        // CtrlReg7XL
+        
         // CtrlReg8
         variant Boot => bool,
         variant Bdu => bool,
@@ -232,6 +245,34 @@ enum_with_type!{
         variant StG => bool,
         variant StXl => bool,
 
+        // FifoCtrl
+        variant Fth => u8,
+        variant FMode => FMode,
+        
+        // IntGenCfgG
+        variant AoiG => bool,
+        variant LirG => bool,
+        variant ZhieG => bool,
+        variant ZlieG => bool,
+        variant YhieG => bool,
+        variant YlieG => bool,
+        variant XhieG => bool,
+        variant XlieG => bool,
+        
+        // IntGenThsXG
+        variant DcrmG => bool,
+        variant IntGenThsXG => u16,
+
+        // IntGenThsYG
+        variant IntGenThsYG => u16,
+
+        // IntGenThsZG
+        variant IntGenThsZG => u16,
+
+        // IntGenDurG
+        variant WaitG => bool,
+        variant DurG => u8,
+
         // OffsetXRegM
         variant OffsetXRegM => u16,
 
@@ -241,11 +282,19 @@ enum_with_type!{
         // OffsetZRegM
         variant OffsetZRegM => u16,
 
-        // int_gen_dur_g
-        variant WaitG => bool,
-        variant DurG => u8,
+        // CtrlReg1M
+        // CtrlReg2M
+        // CtrlReg3M
+        // CtrlReg4M
+        // CtrlReg5M
 
-
+        // IntCfgM
+        variant Xien => bool,
+        variant Yien => bool,
+        variant Zien => bool,
+        variant Iea => bool,
+        variant Iel => bool,
+        variant Ien => bool,
     }
 }
 
