@@ -118,6 +118,41 @@ pub enum FMode {
     Overwrite,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OpMode {
+    LowPower,
+    MediumPerf,
+    HighPerf,
+    UltraHighPerf,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OutputDataRate {
+    Odr0p625Hz,
+    Odr1p25Hz,
+    Odr2p5Hz,
+    Odr5Hz,
+    Odr10Hz,
+    Odr20Hz,
+    Odr40Hz,
+    Odr80Hz,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FsM {
+    Fs4G,
+    Fs8G,
+    Fs12G,
+    Fs16G,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Md {
+    Continuous,
+    Single,
+    PowerDown,
+}
+
 
 enum_with_type!{
     /// Parameters used to configure or given when reading a
@@ -283,8 +318,22 @@ enum_with_type!{
         variant OffsetZRegM => u16,
 
         // CtrlReg1M
+        variant OpMode => OpMode,
+        variant OutputDataRate => OutputDataRate,
+        variant TempComp => bool,
+        variant SelfTest => bool,
+
         // CtrlReg2M
+        variant FsM => FsM,
+        variant RebootM => bool,
+        variant SoftResetM => bool,
+
         // CtrlReg3M
+        variant Md => Md,
+        variant I2cDisableM => bool,
+        variant LowPowerM => bool,
+        variant SimM => bool,
+        
         // CtrlReg4M
         // CtrlReg5M
 
