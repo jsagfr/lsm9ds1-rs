@@ -64,7 +64,7 @@ pub enum GyroScale {
 
 /// Clarifications needed
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum BwG {
+pub enum Bw {
     A,
     B,
     C,
@@ -95,6 +95,15 @@ pub enum IntSel {
 /// Clarifications needed
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OutSel {
+    A,
+    B,
+    C,
+    D,
+}
+
+/// Clarifications needed
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DigCutoffFreq {
     A,
     B,
     C,
@@ -140,10 +149,18 @@ pub enum OutputDataRate {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FsM {
-    Fs4G,
-    Fs8G,
-    Fs12G,
-    Fs16G,
+    Fs4,
+    Fs8,
+    Fs12,
+    Fs16,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FsXl {
+    Fs2,
+    Fs4,
+    Fs8,
+    Fs16,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -223,7 +240,7 @@ enum_with_type!{
         // CtrlReg1G
         variant OdrG => DataRate,
         variant FsG => GyroScale,
-        variant BwG => BwG,
+        variant BwG => Bw,
 
         // CtrlReg2G
         variant IntSel => IntSel,
@@ -256,7 +273,16 @@ enum_with_type!{
         variant Dec => Dec,
 
         // CtrlReg6XL
+        variant OdrXl => DataRate,
+        variant FsXl => FsXl,
+        variant BwScalOdr => bool,
+        variant BwXl => Bw,
+
         // CtrlReg7XL
+        variant HighRes => bool,
+        variant XlDigitalCf => DigCutoffFreq,
+        variant FilteredDataSel => bool,
+        variant HighPassIntSens => bool,   
         
         // CtrlReg8
         variant Boot => bool,
@@ -335,7 +361,11 @@ enum_with_type!{
         variant SimM => bool,
         
         // CtrlReg4M
+        variant OpModeZ => OpMode,
+        variant BigLittleEndian => bool,
+        
         // CtrlReg5M
+        variant BlockDataUpdate => bool,
 
         // IntCfgM
         variant Xien => bool,

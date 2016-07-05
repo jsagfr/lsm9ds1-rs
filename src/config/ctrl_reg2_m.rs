@@ -15,10 +15,10 @@ pub fn from_params(params: &[Param]) -> Result<Register,()> {
         match param {
             Param::FsM(x) => {
                 reg = reg & !FS_MASK | match x {
-                    FsM::Fs4G  => FS_4_G,
-                    FsM::Fs8G  => FS_8_G,
-                    FsM::Fs12G => FS_12_G,
-                    FsM::Fs16G => FS_16_G,
+                    FsM::Fs4  => FS_4_G,
+                    FsM::Fs8  => FS_8_G,
+                    FsM::Fs12 => FS_12_G,
+                    FsM::Fs16 => FS_16_G,
                 }
             }
             Param::RebootM(x) =>  reg = if x {
@@ -46,10 +46,10 @@ pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
             let reboot_m = Param::RebootM(r & REBOOT == REBOOT);
             let soft_reset = Param::SoftResetM(r & SOFT_RESET == SOFT_RESET);
             let fs = Param::FsM(match r & FS_MASK {
-                FS_4_G  => FsM::Fs4G,
-                FS_8_G  => FsM::Fs8G,
-                FS_12_G => FsM::Fs12G,
-                FS_16_G => FsM::Fs16G,
+                FS_4_G  => FsM::Fs4,
+                FS_8_G  => FsM::Fs8,
+                FS_12_G => FsM::Fs12,
+                FS_16_G => FsM::Fs16,
                 _ => unreachable!(),
             });
             Ok(vec![reboot_m, soft_reset, fs])

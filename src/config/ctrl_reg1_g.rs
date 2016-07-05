@@ -1,4 +1,4 @@
-use super::{Register, Param, DataRate, GyroScale, BwG};
+use super::{Register, Param, DataRate, GyroScale, Bw};
 
 const ODR_G_MASK:       u8 = 0b111_00000;
 const ODR_G_POWER_DOWN: u8 = 0b000_00000;
@@ -47,10 +47,10 @@ pub fn from_params(params: &[Param]) -> Result<Register,()> {
             }
             Param::BwG(x) => {
                 reg |= match x {
-                    BwG::A => BW_G_A,
-                    BwG::B => BW_G_B,
-                    BwG::C => BW_G_C,
-                    BwG::D => BW_G_D,
+                    Bw::A => BW_G_A,
+                    Bw::B => BW_G_B,
+                    Bw::C => BW_G_C,
+                    Bw::D => BW_G_D,
                 }
             }
             _ => return Err(()),
@@ -81,10 +81,10 @@ pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
                 _ =>  unreachable!(),
             });
             let bw_g = Param::BwG(match r & BW_G_MASK {
-                BW_G_A => BwG::A,
-                BW_G_B => BwG::B,
-                BW_G_C => BwG::C,
-                BW_G_D => BwG::D,
+                BW_G_A => Bw::A,
+                BW_G_B => Bw::B,
+                BW_G_C => Bw::C,
+                BW_G_D => Bw::D,
                 _ =>  unreachable!(),
             });
             Ok(vec![odr_g, fs_g, bw_g])
