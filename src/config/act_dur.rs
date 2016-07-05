@@ -1,14 +1,26 @@
-use super::{Register, Param};
+use super::{Register, Param, ParamType};
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg = 0x00;
+pub fn from_params(params: &[Param]) -> Option<Register> {
+    let possible_params = vec![ParamType::ActDur];
+    let mut found = false;
     for &param in params {
-        match param {
-            Param::ActDur(x) => reg = x,
-            _ => return Err(()),
+        if possible_params.contains(&param.type_of()) {
+            found = true;
+            break;
         }
     }
-    Ok(Register::ActDur(reg))
+    if found {
+        let mut reg = 0x00;
+        for &param in params {
+            match param {
+                Param::ActDur(x) => reg = x,
+                _ => (),
+            }
+        }
+        Some(Register::ActDur(reg))
+    } else {
+        None
+    }
 }
 
 /// Return a list of param for the *ACT_DUR* register.
@@ -21,7 +33,7 @@ pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
         Register::ActDur(r) => {
             Ok(vec![Param::ActDur(r)])
         }
-        _ => Err(()),
+        _ => Ok(vec![]),
     }
 }
 
