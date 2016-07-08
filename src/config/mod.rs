@@ -662,16 +662,6 @@ impl RegisterType {
     }
 }
 
-fn from_params(params: &[Param]) -> Vec<Register> {
-    let mut regs = vec![];
-    match act_dur::from_params(params) {
-        Some(r) => regs.push(r),
-        None => (),
-    };
-    regs
-}
-
-
 /// `ConfParamBuilder` is use to create a partial or total new configuration of
 /// a *LSM9DS1*.
 /// 

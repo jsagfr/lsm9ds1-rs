@@ -32,19 +32,19 @@ enum Interrupts{}
 // enum Param{}
 
 impl Lsm9ds1 {
-    pub fn temp(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn lx(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn ly(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn lz(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn gx(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn gy(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn gz(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn mx(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn my(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn mz(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn fifo(&mut self) -> Result<f32,()> { unimplemented!() }
-    // pub fn linterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
-    // pub fn ginterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
+    fn temp(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn lx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn ly(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn lz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gy(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn mx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn my(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn mz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn fifo(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn linterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
+    fn ginterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
     // fn params(&mut self) -> Vec<Param> { unimplemented!() }
     // fn param(&mut self, param_type: ParamType) -> Result<Param, ()> { unimplemented!() }
     // fn set_params(&mut self, params: Vec<Param>) -> Result<(), ()> { unimplemented!() }
