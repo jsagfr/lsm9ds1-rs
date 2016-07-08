@@ -5,10 +5,13 @@ const INT_GEN_THS_X_G_MASK: u16 = 0b0111_1111_1111_1111;
 
 pub fn from_params(params: &[Param]) -> Result<Register,()> {
     let mut reg = 0x0000;
+    println!("{:?}", params);
     for &param in params {
         match param {
-            Param::IntGenThsXG(x) if x & !INT_GEN_THS_X_G_MASK != 0 => reg = x,
+            Param::IntGenThsXG(x) if x & !INT_GEN_THS_X_G_MASK == 0 =>
+                reg = reg & !INT_GEN_THS_X_G_MASK | x,
             Param::DcrmG(x) =>  reg = if x {
+                println!("{:?}", reg |  DCRM_G);
                 reg |  DCRM_G
             } else {
                 reg & !DCRM_G
@@ -22,7 +25,7 @@ pub fn from_params(params: &[Param]) -> Result<Register,()> {
 pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
     match reg {
         Register::IntGenThsXG(r) => {
-            let int_gen_ths_x_g = Param::IntGenThsXG(r);
+            let int_gen_ths_x_g = Param::IntGenThsXG(r & INT_GEN_THS_X_G_MASK);
             let dcrm_g = Param::DcrmG(r & DCRM_G == DCRM_G);
             Ok(vec![int_gen_ths_x_g, dcrm_g])
         }

@@ -179,6 +179,7 @@ enum_with_type!{
     /// Parameters type used to get a *LSM9DS1* configuration.
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     enum_type ParamType {
+        // ActThs
         /// Gyroscope inactivity threshold.
         ///
         /// __TODO: Question: is accelerometer concerned?__
@@ -190,6 +191,8 @@ enum_with_type!{
         ///
         /// * Default value is `Disable`
         variant SleepOn => bool,
+
+        // ActDur
         /// Gyroscope inactivity duration.
         ///
         /// __TODO: Question: is accelerometer concerned?__
@@ -197,6 +200,8 @@ enum_with_type!{
         /// * Possible values in `u8`
         /// * Default value is `0`
         variant ActDur => u8,
+        
+        // IntGenCfgXl 
         /// AND/OR combination of accelerometer's interrupt events.
         /// 
         /// * Default value: `Or`
@@ -208,14 +213,22 @@ enum_with_type!{
         variant YlieXl => bool,
         variant XhieXl => bool,
         variant XlieXl => bool,
+
+        // IntGenThsXXl
         variant IntGenThsXXl => u8,
+
+        // IntGenThsYXl
         variant IntGenThsYXl => u8,
+
+        // IntGenThsZXl
         variant IntGenThsZXl => u8,
 
+        // IntGenDurXl
         variant WaitXl => bool,
         /// Linear acceleration sensor interrupt duration.
         variant DurXl => u8,
 
+        // ReferenceG
         variant ReferenceG => u8,
 
         // Int1Ctrl register
@@ -377,6 +390,189 @@ enum_with_type!{
     }
 }
 
+impl Param {
+    pub fn reg_type(&self) -> RegisterType {
+        match self.type_of() {
+            ParamType::ActThs  => RegisterType::ActThs,
+            ParamType::SleepOn => RegisterType::ActThs,
+
+            ParamType::ActDur => RegisterType::ActDur,
+            
+            ParamType::AoiXl    => RegisterType::IntGenCfgXl,
+            ParamType::Detect6D => RegisterType::IntGenCfgXl,
+            ParamType::ZhieXl   => RegisterType::IntGenCfgXl,
+            ParamType::ZlieXl   => RegisterType::IntGenCfgXl,
+            ParamType::YhieXl   => RegisterType::IntGenCfgXl,
+            ParamType::YlieXl   => RegisterType::IntGenCfgXl,
+            ParamType::XhieXl   => RegisterType::IntGenCfgXl,
+            ParamType::XlieXl   => RegisterType::IntGenCfgXl,
+
+            ParamType::IntGenThsXXl => RegisterType::IntGenThsXXl,
+            ParamType::IntGenThsYXl => RegisterType::IntGenThsYXl,
+            ParamType::IntGenThsZXl => RegisterType::IntGenThsZXl,
+
+            ParamType::WaitXl => RegisterType::IntGenDurXl,
+            ParamType::DurXl  => RegisterType::IntGenDurXl,
+
+            ParamType::ReferenceG => RegisterType::ReferenceG,
+
+            // Int1Ctrl register
+            ParamType::Int1IgG    => RegisterType::Int1Ctrl,
+            ParamType::Int1IgXl   => RegisterType::Int1Ctrl,
+            ParamType::Int1Fss5   => RegisterType::Int1Ctrl,
+            ParamType::Int1Ovr    => RegisterType::Int1Ctrl,
+            ParamType::Int1Fth    => RegisterType::Int1Ctrl,
+            ParamType::Int1Boot   => RegisterType::Int1Ctrl,
+            ParamType::Int1DrdyG  => RegisterType::Int1Ctrl,
+            ParamType::Int1DrdyXl => RegisterType::Int1Ctrl,
+
+            // Int2Ctrl register:
+            ParamType::Int2Inact    => RegisterType::Int2Ctrl,
+            ParamType::Int2Fss5     => RegisterType::Int2Ctrl,
+            ParamType::Int2Ovr      => RegisterType::Int2Ctrl,
+            ParamType::Int2Fth      => RegisterType::Int2Ctrl,
+            ParamType::Int2DrdyTemp => RegisterType::Int2Ctrl,
+            ParamType::Int2DrdyG    => RegisterType::Int2Ctrl,
+            ParamType::Int2DrdyXl   => RegisterType::Int2Ctrl,
+
+            // CtrlReg1G
+            ParamType::OdrG => RegisterType::CtrlReg1G,
+            ParamType::FsG  => RegisterType::CtrlReg1G,
+            ParamType::BwG  => RegisterType::CtrlReg1G,
+
+            // CtrlReg2G
+            ParamType::IntSel => RegisterType::CtrlReg2G,
+            ParamType::OutSel => RegisterType::CtrlReg2G,
+
+            // CtrlReg3G
+            ParamType::LPMode => RegisterType::CtrlReg3G,
+            ParamType::HpEn   => RegisterType::CtrlReg3G,
+            ParamType::HpcfG  => RegisterType::CtrlReg3G,
+
+            // OrientCfgG
+            ParamType::SignXG => RegisterType::OrientCfgG,
+            ParamType::SignYG => RegisterType::OrientCfgG,
+            ParamType::SignZG => RegisterType::OrientCfgG,
+            ParamType::Orient => RegisterType::OrientCfgG,
+
+            // CtrlReg4
+            ParamType::ZenG   => RegisterType::CtrlReg4,
+            ParamType::YenG   => RegisterType::CtrlReg4,
+            ParamType::XenG   => RegisterType::CtrlReg4,
+            ParamType::LirXl1 => RegisterType::CtrlReg4,
+            ParamType::I4dXl1 => RegisterType::CtrlReg4,
+
+            // CtrlReg5XL
+            ParamType::ZenXl => RegisterType::CtrlReg5Xl,
+            ParamType::YenXl => RegisterType::CtrlReg5Xl,
+            ParamType::XenXl => RegisterType::CtrlReg5Xl,
+            ParamType::Dec   => RegisterType::CtrlReg5Xl,
+
+            // CtrlReg6XL
+            ParamType::OdrXl     => RegisterType::CtrlReg6Xl,
+            ParamType::FsXl      => RegisterType::CtrlReg6Xl,
+            ParamType::BwScalOdr => RegisterType::CtrlReg6Xl,
+            ParamType::BwXl      => RegisterType::CtrlReg6Xl,
+
+            // CtrlReg7XL
+            ParamType::HighRes         => RegisterType::CtrlReg7Xl,
+            ParamType::XlDigitalCf     => RegisterType::CtrlReg7Xl,
+            ParamType::FilteredDataSel => RegisterType::CtrlReg7Xl,
+            ParamType::HighPassIntSens => RegisterType::CtrlReg7Xl, 
+            
+            // CtrlReg8
+            ParamType::Boot     => RegisterType::CtrlReg8,
+            ParamType::Bdu      => RegisterType::CtrlReg8,
+            ParamType::HLactive => RegisterType::CtrlReg8,
+            ParamType::PpOd     => RegisterType::CtrlReg8,
+            ParamType::Sim      => RegisterType::CtrlReg8,
+            ParamType::IfAddInc => RegisterType::CtrlReg8,
+            ParamType::Ble      => RegisterType::CtrlReg8,
+            ParamType::SwReset  => RegisterType::CtrlReg8,
+
+            // CtrlReg9
+            ParamType::SleepG      => RegisterType::CtrlReg9,
+            ParamType::FifoTempEn  => RegisterType::CtrlReg9,
+            ParamType::DrdyMaskBit => RegisterType::CtrlReg9,
+            ParamType::I2cDisable  => RegisterType::CtrlReg9,
+            ParamType::FifoEn      => RegisterType::CtrlReg9,
+            ParamType::StopOnFth   => RegisterType::CtrlReg9,
+
+            // CtrlReg10
+            ParamType::StG  => RegisterType::CtrlReg10,
+            ParamType::StXl => RegisterType::CtrlReg10,
+
+            // FifoCtrl
+            ParamType::Fth   => RegisterType::FifoCtrl,
+            ParamType::FMode => RegisterType::FifoCtrl,
+            
+            // IntGenCfgG
+            ParamType::AoiG  => RegisterType::IntGenCfgG,
+            ParamType::LirG  => RegisterType::IntGenCfgG,
+            ParamType::ZhieG => RegisterType::IntGenCfgG,
+            ParamType::ZlieG => RegisterType::IntGenCfgG,
+            ParamType::YhieG => RegisterType::IntGenCfgG,
+            ParamType::YlieG => RegisterType::IntGenCfgG,
+            ParamType::XhieG => RegisterType::IntGenCfgG,
+            ParamType::XlieG => RegisterType::IntGenCfgG,
+            
+            // IntGenThsXG
+            ParamType::DcrmG       => RegisterType::IntGenThsXG,
+            ParamType::IntGenThsXG => RegisterType::IntGenThsXG,
+
+            // IntGenThsYG
+            ParamType::IntGenThsYG => RegisterType::IntGenThsYG,
+
+            // IntGenThsZG
+            ParamType::IntGenThsZG => RegisterType::IntGenThsZG,
+
+            // IntGenDurG
+            ParamType::WaitG => RegisterType::IntGenDurG,
+            ParamType::DurG  => RegisterType::IntGenDurG,
+
+            // OffsetXRegM
+            ParamType::OffsetXRegM => RegisterType::OffsetXRegM,
+
+            // OffsetYRegM
+            ParamType::OffsetYRegM => RegisterType::OffsetYRegM,
+            
+            // OffsetZRegM
+            ParamType::OffsetZRegM => RegisterType::OffsetZRegM,
+
+            // CtrlReg1M
+            ParamType::OpMode         => RegisterType::CtrlReg1M,
+            ParamType::OutputDataRate => RegisterType::CtrlReg1M,
+            ParamType::TempComp       => RegisterType::CtrlReg1M,
+            ParamType::SelfTest       => RegisterType::CtrlReg1M,
+
+            // CtrlReg2M
+            ParamType::FsM        => RegisterType::CtrlReg2M,
+            ParamType::RebootM    => RegisterType::CtrlReg2M,
+            ParamType::SoftResetM => RegisterType::CtrlReg2M,
+
+            // CtrlReg3M
+            ParamType::Md          => RegisterType::CtrlReg3M,
+            ParamType::I2cDisableM => RegisterType::CtrlReg3M,
+            ParamType::LowPowerM   => RegisterType::CtrlReg3M,
+            ParamType::SimM        => RegisterType::CtrlReg3M,
+            
+            // CtrlReg4M
+            ParamType::OpModeZ         => RegisterType::CtrlReg4M,
+            ParamType::BigLittleEndian => RegisterType::CtrlReg4M,
+            
+            // CtrlReg5M
+            ParamType::BlockDataUpdate => RegisterType::CtrlReg5M,
+
+            // IntCfgM
+            ParamType::Xien => RegisterType::IntCfgM,
+            ParamType::Yien => RegisterType::IntCfgM,
+            ParamType::Zien => RegisterType::IntCfgM,
+            ParamType::Iea  => RegisterType::IntCfgM,
+            ParamType::Iel  => RegisterType::IntCfgM,
+            ParamType::Ien  => RegisterType::IntCfgM,
+        }
+    }
+}
 
 enum_with_type!{
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -427,7 +623,41 @@ impl RegisterType {
     fn from_params(&self, params: &[Param]) -> Result<Register,()> {
         match *self {
             RegisterType::ActThs => act_ths::from_params(params),
-            _ => Err(()),
+            RegisterType::ActDur => act_dur::from_params(params),
+            RegisterType::IntGenCfgXl => int_gen_cfg_xl::from_params(params),
+            RegisterType::IntGenThsXXl => int_gen_ths_x_xl::from_params(params),
+            RegisterType::IntGenThsYXl => int_gen_ths_y_xl::from_params(params),
+            RegisterType::IntGenThsZXl => int_gen_ths_z_xl::from_params(params),
+            RegisterType::IntGenDurXl => int_gen_dur_xl::from_params(params),
+            RegisterType::ReferenceG => reference_g::from_params(params),
+            RegisterType::Int1Ctrl => int1_ctrl::from_params(params),
+            RegisterType::Int2Ctrl => int2_ctrl::from_params(params),
+            RegisterType::CtrlReg1G => ctrl_reg1_g::from_params(params),
+            RegisterType::CtrlReg2G => ctrl_reg2_g::from_params(params),
+            RegisterType::CtrlReg3G => ctrl_reg3_g::from_params(params),
+            RegisterType::OrientCfgG => orient_cfg_g::from_params(params),
+            RegisterType::CtrlReg4 => ctrl_reg4::from_params(params),
+            RegisterType::CtrlReg5Xl => ctrl_reg5_xl::from_params(params),
+            RegisterType::CtrlReg6Xl => ctrl_reg6_xl::from_params(params),
+            RegisterType::CtrlReg7Xl => ctrl_reg7_xl::from_params(params),
+            RegisterType::CtrlReg8 => ctrl_reg8::from_params(params),
+            RegisterType::CtrlReg9 => ctrl_reg9::from_params(params),
+            RegisterType::CtrlReg10 => ctrl_reg10::from_params(params),
+            RegisterType::FifoCtrl => fifo_ctrl::from_params(params),
+            RegisterType::IntGenCfgG => int_gen_cfg_g::from_params(params),
+            RegisterType::IntGenThsXG => int_gen_ths_x_g::from_params(params),
+            RegisterType::IntGenThsYG => int_gen_ths_y_g::from_params(params),
+            RegisterType::IntGenThsZG => int_gen_ths_z_g::from_params(params),
+            RegisterType::IntGenDurG => int_gen_dur_g::from_params(params),
+            RegisterType::OffsetXRegM => offset_x_reg_m::from_params(params),
+            RegisterType::OffsetYRegM => offset_y_reg_m::from_params(params),
+            RegisterType::OffsetZRegM => offset_z_reg_m::from_params(params),
+            RegisterType::CtrlReg1M => ctrl_reg1_m::from_params(params),
+            RegisterType::CtrlReg2M => ctrl_reg2_m::from_params(params),
+            RegisterType::CtrlReg3M => ctrl_reg3_m::from_params(params),
+            RegisterType::CtrlReg4M => ctrl_reg4_m::from_params(params),
+            RegisterType::CtrlReg5M => ctrl_reg5_m::from_params(params),
+            RegisterType::IntCfgM => int_cfg_m::from_params(params),
         }
     }
 }
@@ -495,17 +725,8 @@ impl ConfParamBuilder {
         let mut hash_param = HashMap::new();
         for &p in &self.params {
             hash_param.insert(p.type_of(), p);
-            match p {
-                Param::ActThs(_) => {
-                    let params = hash_reg.entry(RegisterType::ActThs).or_insert(Vec::new());
-                    params.push(p);
-                }
-                Param::SleepOn(_) => {
-                    let params = hash_reg.entry(RegisterType::ActThs).or_insert(Vec::new());
-                    params.push(p);
-                }
-                _ => unimplemented!(),
-            }
+            let params = hash_reg.entry(p.reg_type()).or_insert(Vec::new());
+            params.push(p);
         }
 
         let mut registers = Vec::new();
@@ -588,15 +809,49 @@ impl ConfRegBuilder {
     pub fn build(&self) -> Result<Config,()> {
         let mut params = HashMap::new();
         for &reg in &self.registers {
-            match reg {
-                Register::ActThs(_) => {
-                    for p in try!(act_ths::from_register(reg)) {
-                        params.insert(p.type_of(), p);
-                    }
-                }
-                _ => unimplemented!(),
+            let reg_params = match reg.type_of() {
+                RegisterType::ActThs => try!(act_ths::from_register(reg)),
+                RegisterType::ActDur => try!(act_dur::from_register(reg)),
+                RegisterType::IntGenCfgXl => try!(int_gen_cfg_xl::from_register(reg)),
+                RegisterType::IntGenThsXXl => try!(int_gen_ths_x_xl::from_register(reg)),
+                RegisterType::IntGenThsYXl => try!(int_gen_ths_y_xl::from_register(reg)),
+                RegisterType::IntGenThsZXl => try!(int_gen_ths_z_xl::from_register(reg)),
+                RegisterType::IntGenDurXl => try!(int_gen_dur_xl::from_register(reg)),
+                RegisterType::ReferenceG => try!(reference_g::from_register(reg)),
+                RegisterType::Int1Ctrl => try!(int1_ctrl::from_register(reg)),
+                RegisterType::Int2Ctrl => try!(int2_ctrl::from_register(reg)),
+                RegisterType::CtrlReg1G => try!(ctrl_reg1_g::from_register(reg)),
+                RegisterType::CtrlReg2G => try!(ctrl_reg2_g::from_register(reg)),
+                RegisterType::CtrlReg3G => try!(ctrl_reg3_g::from_register(reg)),
+                RegisterType::OrientCfgG => try!(orient_cfg_g::from_register(reg)),
+                RegisterType::CtrlReg4 => try!(ctrl_reg4::from_register(reg)),
+                RegisterType::CtrlReg5Xl => try!(ctrl_reg5_xl::from_register(reg)),
+                RegisterType::CtrlReg6Xl => try!(ctrl_reg6_xl::from_register(reg)),
+                RegisterType::CtrlReg7Xl => try!(ctrl_reg7_xl::from_register(reg)),
+                RegisterType::CtrlReg8 => try!(ctrl_reg8::from_register(reg)),
+                RegisterType::CtrlReg9 => try!(ctrl_reg9::from_register(reg)),
+                RegisterType::CtrlReg10 => try!(ctrl_reg10::from_register(reg)),
+                RegisterType::FifoCtrl => try!(fifo_ctrl::from_register(reg)),
+                RegisterType::IntGenCfgG => try!(int_gen_cfg_g::from_register(reg)),
+                RegisterType::IntGenThsXG => try!(int_gen_ths_x_g::from_register(reg)),
+                RegisterType::IntGenThsYG => try!(int_gen_ths_y_g::from_register(reg)),
+                RegisterType::IntGenThsZG => try!(int_gen_ths_z_g::from_register(reg)),
+                RegisterType::IntGenDurG => try!(int_gen_dur_g::from_register(reg)),
+                RegisterType::OffsetXRegM => try!(offset_x_reg_m::from_register(reg)),
+                RegisterType::OffsetYRegM => try!(offset_y_reg_m::from_register(reg)),
+                RegisterType::OffsetZRegM => try!(offset_z_reg_m::from_register(reg)),
+                RegisterType::CtrlReg1M => try!(ctrl_reg1_m::from_register(reg)),
+                RegisterType::CtrlReg2M => try!(ctrl_reg2_m::from_register(reg)),
+                RegisterType::CtrlReg3M => try!(ctrl_reg3_m::from_register(reg)),
+                RegisterType::CtrlReg4M => try!(ctrl_reg4_m::from_register(reg)),
+                RegisterType::CtrlReg5M => try!(ctrl_reg5_m::from_register(reg)),
+                RegisterType::IntCfgM => try!(int_cfg_m::from_register(reg)),
+            };
+            for p in reg_params {
+                params.insert(p.type_of(), p);
             }
         }
+
         Ok(Config {
             params: params,
             registers: self.registers.clone(),
@@ -698,17 +953,134 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use super::{ConfParamBuilder, ConfRegBuilder, Param};
+    use super::{ConfParamBuilder, ConfRegBuilder, Param,
+                DataRate, GyroScale, Bw, IntSel, OutSel, Dec, DigCutoffFreq,
+                FsXl, FMode, OpMode, FsM, Md, OutputDataRate};
     
     #[test]
     fn it_works() {
         let conf1 = ConfParamBuilder::new()
             .set(Param::ActThs(5))
             .set(Param::SleepOn(true))
-            .build().unwrap();
+            .set(Param::ActDur(5))
+            .set(Param::AoiXl(true))
+            .set(Param::Detect6D(true))
+            .set(Param::ZhieXl(true))
+            .set(Param::ZlieXl(true))
+            .set(Param::YhieXl(true))
+            .set(Param::YlieXl(true))
+            .set(Param::XhieXl(true))
+            .set(Param::XlieXl(true))
+            .set(Param::IntGenThsXXl(5))
+            .set(Param::IntGenThsYXl(5))
+            .set(Param::IntGenThsZXl(5))
+            .set(Param::WaitXl(true))
+            .set(Param::DurXl(5))
+            .set(Param::ReferenceG(5))
+            .set(Param::Int1IgG(true))
+            .set(Param::Int1IgXl(true))
+            .set(Param::Int1Fss5(true))
+            .set(Param::Int1Ovr(true))
+            .set(Param::Int1Fth(true))
+            .set(Param::Int1Boot(true))
+            .set(Param::Int1DrdyG(true))
+            .set(Param::Int1DrdyXl(true))
+            .set(Param::Int2Inact(true))
+            .set(Param::Int2Fss5(true))
+            .set(Param::Int2Ovr(true))
+            .set(Param::Int2Fth(true))
+            .set(Param::Int2DrdyTemp(true))
+            .set(Param::Int2DrdyG(true))
+            .set(Param::Int2DrdyXl(true))
+            .set(Param::OdrG(DataRate::DR15Hz))
+            .set(Param::FsG(GyroScale::FS245Dps))
+            .set(Param::BwG(Bw::B))
+            .set(Param::IntSel(IntSel::A))
+            .set(Param::OutSel(OutSel::A))
+            .set(Param::LPMode(true))
+            .set(Param::HpEn(true))
+            .set(Param::HpcfG(5))
+            .set(Param::SignXG(true))
+            .set(Param::SignYG(true))
+            .set(Param::SignZG(true))
+            .set(Param::Orient(5))
+            .set(Param::ZenG(true))
+            .set(Param::YenG(true))
+            .set(Param::XenG(true))
+            .set(Param::LirXl1(true))
+            .set(Param::I4dXl1(true))
+            .set(Param::ZenXl(true))
+            .set(Param::YenXl(true))
+            .set(Param::XenXl(true))
+            .set(Param::Dec(Dec::Dec2S))
+            .set(Param::OdrXl(DataRate::DR15Hz))
+            .set(Param::FsXl(FsXl::Fs2))
+            .set(Param::BwScalOdr(true))
+            .set(Param::BwXl(Bw::B))
+            .set(Param::HighRes(true))
+            .set(Param::XlDigitalCf(DigCutoffFreq::A))
+            .set(Param::FilteredDataSel(true))
+            .set(Param::HighPassIntSens(true))   
+            .set(Param::Boot(true))
+            .set(Param::Bdu(true))
+            .set(Param::HLactive(true))
+            .set(Param::PpOd(true))
+            .set(Param::Sim(true))
+            .set(Param::IfAddInc(true))
+            .set(Param::Ble(true))
+            .set(Param::SwReset(true))
+            .set(Param::SleepG(true))
+            .set(Param::FifoTempEn(true))
+            .set(Param::DrdyMaskBit(true))
+            .set(Param::I2cDisable(true))
+            .set(Param::FifoEn(true))
+            .set(Param::StopOnFth(true))
+            .set(Param::StG(true))
+            .set(Param::StXl(true))
+            .set(Param::Fth(5))
+            .set(Param::FMode(FMode::Overwrite))
+            .set(Param::AoiG(true))
+            .set(Param::LirG(true))
+            .set(Param::ZhieG(true))
+            .set(Param::ZlieG(true))
+            .set(Param::YhieG(true))
+            .set(Param::YlieG(true))
+            .set(Param::XhieG(true))
+            .set(Param::XlieG(true))
+            .set(Param::DcrmG(true))
+            .set(Param::IntGenThsXG(5))
+            .set(Param::IntGenThsYG(5))
+            .set(Param::IntGenThsZG(5))
+            .set(Param::WaitG(true))
+            .set(Param::DurG(5))
+            .set(Param::OffsetXRegM(5))
+            .set(Param::OffsetYRegM(5))
+            .set(Param::OffsetZRegM(5))
+            .set(Param::OpMode(OpMode::UltraHighPerf))
+            .set(Param::OutputDataRate(OutputDataRate::Odr5Hz))
+            .set(Param::TempComp(true))
+            .set(Param::SelfTest(true))
+            .set(Param::FsM(FsM::Fs4))
+            .set(Param::RebootM(true))
+            .set(Param::SoftResetM(true))
+            .set(Param::Md(Md::Single))
+            .set(Param::I2cDisableM(true))
+            .set(Param::LowPowerM(true))
+            .set(Param::SimM(true))
+            .set(Param::OpModeZ(OpMode::UltraHighPerf))
+            .set(Param::BigLittleEndian(true))
+            .set(Param::BlockDataUpdate(true))
+            .set(Param::Xien(true))
+            .set(Param::Yien(true))
+            .set(Param::Zien(true))
+            .set(Param::Iea(true))
+            .set(Param::Iel(true))
+            .set(Param::Ien(true))
+            .build().expect("conf1 build failed");
+
         let conf2 = ConfRegBuilder::new().
             set_all(conf1.registers())
-            .build().unwrap();
+            .build().expect("conf2 build failed");
 
         assert_eq!(conf1, conf2);
         

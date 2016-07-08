@@ -6,7 +6,8 @@ pub fn from_params(params: &[Param]) -> Result<Register,()> {
     let mut reg = 0x0000;
     for &param in params {
         match param {
-            Param::IntGenThsZG(x) if x & !INT_GEN_THS_Z_G_MASK != 0 => reg = x,
+            Param::IntGenThsZG(x) if x & !INT_GEN_THS_Z_G_MASK == 0 =>
+                reg = reg & !INT_GEN_THS_Z_G_MASK | x,
             _ => return Err(()),
         }
     }
@@ -29,7 +30,7 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let r1 = Register::IntGenThsZG(0xF21A);
+        let r1 = Register::IntGenThsZG(0x721A);
         let r2 = from_params(&from_register(r1).unwrap()).unwrap();
         assert_eq!(r1, r2);
     }
