@@ -2,6 +2,8 @@
 use std::collections::HashMap;
 use std::iter::Iterator;
 
+use super::Address;
+
 #[macro_use]
 mod macros;
 
@@ -619,8 +621,93 @@ enum_with_type!{
     }
 }
 
+const ACT_THS:          Address = Address::RW(0x04);
+const ACT_DUR:          Address = Address::RW(0x05);
+const INT_GEN_CFG_XL:   Address = Address::RW(0x06);
+const INT_GEN_THS_X_XL: Address = Address::RW(0x07);
+const INT_GEN_THS_Y_XL: Address = Address::RW(0x08);
+const INT_GEN_THS_Z_XL: Address = Address::RW(0x09);
+const INT_GEN_DUR_XL:   Address = Address::RW(0x0A);
+const REFERENCE_G:      Address = Address::RW(0x0B);
+const INT1_CTRL:        Address = Address::RW(0x0C);
+const INT2_CTRL:        Address = Address::RW(0x0D);
+const CTRL_REG1_G:      Address = Address::RW(0x10);
+const CTRL_REG2_G:      Address = Address::RW(0x11);
+const CTRL_REG3_G:      Address = Address::RW(0x12);
+const ORIENT_CFG_G:     Address = Address::RW(0x13);
+const INT_GEN_SRC_G:    Address = Address::RW(0x14);
+const CTRL_REG4:        Address = Address::RW(0x1E);
+const CTRL_REG5_XL:     Address = Address::RW(0x1F);
+const CTRL_REG6_XL:     Address = Address::RW(0x20);
+const CTRL_REG7_XL:     Address = Address::RW(0x21);
+const CTRL_REG8:        Address = Address::RW(0x22);
+const CTRL_REG9:        Address = Address::RW(0x23);
+const CTRL_REG10:       Address = Address::RW(0x24);
+const FIFO_CTRL:        Address = Address::RW(0x2E);
+const INT_GEN_CFG_G:    Address = Address::RW(0x30);
+const INT_GEN_THS_X_G:  Address = Address::RW16(0x31);
+const INT_GEN_THS_Y_G:  Address = Address::RW16(0x33);
+const INT_GEN_THS_Z_G:  Address = Address::RW16(0x35);
+const INT_GEN_DUR_G:    Address = Address::RW(0x37);
+const OFFSET_X_REG_M:   Address = Address::RW16(0x05);
+const OFFSET_Y_REG_M:   Address = Address::RW16(0x07);
+const OFFSET_Z_REG_M:   Address = Address::RW16(0x09);
+const CTRL_REG1_M:      Address = Address::RW(0x20);
+const CTRL_REG2_M:      Address = Address::RW(0x21);
+const CTRL_REG3_M:      Address = Address::RW(0x22);
+const CTRL_REG4_M:      Address = Address::RW(0x23);
+const CTRL_REG5_M:      Address = Address::RW(0x24);
+const OUT_X_M:          Address = Address::R16(0x28);
+const OUT_Y_M:          Address = Address::R16(0x2A);
+const OUT_Z_M:          Address = Address::R16(0x2C);
+const INT_CFG_M:        Address = Address::RW(0x30);
+const INT_THS_M:        Address = Address::R16(0x32);
+
+impl Register {
+    pub fn address(&self) -> Address {
+        match *self {
+            Register::ActThs(_) => ACT_THS,
+            Register::ActDur(_) => ACT_DUR,
+            Register::IntGenCfgXl(_) => INT_GEN_CFG_XL,
+            Register::IntGenThsXXl(_) => INT_GEN_THS_X_XL,
+            Register::IntGenThsYXl(_) => INT_GEN_THS_Y_XL,
+            Register::IntGenThsZXl(_) => INT_GEN_THS_Z_XL,
+            Register::IntGenDurXl(_) => INT_GEN_DUR_XL,
+            Register::ReferenceG(_) => REFERENCE_G,
+            Register::Int1Ctrl(_) => INT1_CTRL,
+            Register::Int2Ctrl(_) => INT2_CTRL,
+            Register::CtrlReg1G(_) => CTRL_REG1_G,
+            Register::CtrlReg2G(_) => CTRL_REG2_G,
+            Register::CtrlReg3G(_) => CTRL_REG3_G,
+            Register::OrientCfgG(_) => ORIENT_CFG_G,
+            Register::CtrlReg4(_) => CTRL_REG4,
+            Register::CtrlReg5Xl(_) => CTRL_REG5_XL,
+            Register::CtrlReg6Xl(_) => CTRL_REG6_XL,
+            Register::CtrlReg7Xl(_) => CTRL_REG7_XL,
+            Register::CtrlReg8(_) => CTRL_REG8,
+            Register::CtrlReg9(_) => CTRL_REG9,
+            Register::CtrlReg10(_) => CTRL_REG10,
+            Register::FifoCtrl(_) => FIFO_CTRL,
+            Register::IntGenCfgG(_) => INT_GEN_CFG_G,
+            Register::IntGenThsXG(_) => INT_GEN_THS_X_G,
+            Register::IntGenThsYG(_) => INT_GEN_THS_Y_G,
+            Register::IntGenThsZG(_) => INT_GEN_THS_Z_G,
+            Register::IntGenDurG(_) => INT_GEN_DUR_G,
+            Register::OffsetXRegM(_) => OFFSET_X_REG_M,
+            Register::OffsetYRegM(_) => OFFSET_Y_REG_M,
+            Register::OffsetZRegM(_) => OFFSET_Z_REG_M,
+            Register::CtrlReg1M(_) => CTRL_REG1_M,
+            Register::CtrlReg2M(_) => CTRL_REG2_M,
+            Register::CtrlReg3M(_) => CTRL_REG3_M,
+            Register::CtrlReg4M(_) => CTRL_REG4_M,
+            Register::CtrlReg5M(_) => CTRL_REG5_M,
+            Register::IntCfgM(_) => INT_CFG_M,
+        }
+    }
+}
+
 impl RegisterType {
-    fn from_params(&self, params: &[Param]) -> Result<Register,()> {
+    pub fn from_params(&self, params: &[Param]) -> Result<Register,()> {
         match *self {
             RegisterType::ActThs => act_ths::from_params(params),
             RegisterType::ActDur => act_dur::from_params(params),
@@ -660,6 +747,47 @@ impl RegisterType {
             RegisterType::IntCfgM => int_cfg_m::from_params(params),
         }
     }
+    pub fn address(&self) -> Address {
+        match *self {
+            RegisterType::ActThs => ACT_THS,
+            RegisterType::ActDur => ACT_DUR,
+            RegisterType::IntGenCfgXl => INT_GEN_CFG_XL,
+            RegisterType::IntGenThsXXl => INT_GEN_THS_X_XL,
+            RegisterType::IntGenThsYXl => INT_GEN_THS_Y_XL,
+            RegisterType::IntGenThsZXl => INT_GEN_THS_Z_XL,
+            RegisterType::IntGenDurXl => INT_GEN_DUR_XL,
+            RegisterType::ReferenceG => REFERENCE_G,
+            RegisterType::Int1Ctrl => INT1_CTRL,
+            RegisterType::Int2Ctrl => INT2_CTRL,
+            RegisterType::CtrlReg1G => CTRL_REG1_G,
+            RegisterType::CtrlReg2G => CTRL_REG2_G,
+            RegisterType::CtrlReg3G => CTRL_REG3_G,
+            RegisterType::OrientCfgG => ORIENT_CFG_G,
+            RegisterType::CtrlReg4 => CTRL_REG4,
+            RegisterType::CtrlReg5Xl => CTRL_REG5_XL,
+            RegisterType::CtrlReg6Xl => CTRL_REG6_XL,
+            RegisterType::CtrlReg7Xl => CTRL_REG7_XL,
+            RegisterType::CtrlReg8 => CTRL_REG8,
+            RegisterType::CtrlReg9 => CTRL_REG9,
+            RegisterType::CtrlReg10 => CTRL_REG10,
+            RegisterType::FifoCtrl => FIFO_CTRL,
+            RegisterType::IntGenCfgG => INT_GEN_CFG_G,
+            RegisterType::IntGenThsXG => INT_GEN_THS_X_G,
+            RegisterType::IntGenThsYG => INT_GEN_THS_Y_G,
+            RegisterType::IntGenThsZG => INT_GEN_THS_Z_G,
+            RegisterType::IntGenDurG => INT_GEN_DUR_G,
+            RegisterType::OffsetXRegM => OFFSET_X_REG_M,
+            RegisterType::OffsetYRegM => OFFSET_Y_REG_M,
+            RegisterType::OffsetZRegM => OFFSET_Z_REG_M,
+            RegisterType::CtrlReg1M => CTRL_REG1_M,
+            RegisterType::CtrlReg2M => CTRL_REG2_M,
+            RegisterType::CtrlReg3M => CTRL_REG3_M,
+            RegisterType::CtrlReg4M => CTRL_REG4_M,
+            RegisterType::CtrlReg5M => CTRL_REG5_M,
+            RegisterType::IntCfgM => INT_CFG_M,
+        }
+    }
+
 }
 
 /// `ConfParamBuilder` is use to create a partial or total new configuration of

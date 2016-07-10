@@ -11,6 +11,16 @@ pub mod config;
 // mod act_dur_reg;
 // mod int_gen_cfg_xl;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Address{
+    RW(u8),
+    RW16(u8),
+    R(u8),
+    R16(u8),
+}
+
+
+
 // use register::{Address};
 
 // pub trait Lsm9ds1Device {
