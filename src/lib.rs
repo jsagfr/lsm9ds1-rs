@@ -6,6 +6,7 @@
 
 // mod register;
 pub mod config;
+use config::{Config, Param, Register};
 
 // mod act_ths_reg;
 // mod act_dur_reg;
@@ -32,7 +33,7 @@ pub enum Address{
 
 
 pub struct Lsm9ds1 {
-    // TBC
+    config: Config,
 }
 
 enum Interrupts{}
@@ -55,7 +56,9 @@ impl Lsm9ds1 {
     fn fifo(&mut self) -> Result<f32,()> { unimplemented!() }
     fn linterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
     fn ginterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
-    // fn params(&mut self) -> Vec<Param> { unimplemented!() }
+
+    fn params<'a>(&'a self) -> Vec<&'a Param> { self.config.params() }
+    
     // fn param(&mut self, param_type: ParamType) -> Result<Param, ()> { unimplemented!() }
     // fn set_params(&mut self, params: Vec<Param>) -> Result<(), ()> { unimplemented!() }
     // fn set_param(&mut self, param_type: ParamType) -> Result<(), ()> { unimplemented!() }
