@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 use std::collections::HashMap;
 use std::iter::Iterator;
+use std::slice::Iter;
 
 use super::Address;
 
@@ -180,7 +181,7 @@ enum_with_type!{
     enum Param,
     /// Parameters type used to get a *LSM9DS1* configuration.
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    enum_type ParamType {
+    enum_type ParamType : 116; {
         // ActThs
         /// Gyroscope inactivity threshold.
         ///
@@ -580,7 +581,7 @@ enum_with_type!{
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     enum Register,
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    enum_type RegisterType {
+    enum_type RegisterType : 36; {
         variant ActThs => u8,
         variant ActDur => u8,
         variant IntGenCfgXl => u8,
