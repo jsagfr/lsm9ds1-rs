@@ -1,4 +1,5 @@
-use super::{Register, Param, DataRate, FsXl, Bw};
+use super::super::Address;
+use super::{Register, CTRL_REG6_XL, DataRate, FsXl, Bw};
 
 const ODR_XL_MASK:       u8 = 0b111_00000;
 const ODR_XL_POWER_DOWN: u8 = 0b000_00000;
@@ -21,95 +22,129 @@ const BW_XL_B:           u8 = 0b0000_00_01;
 const BW_XL_C:           u8 = 0b0000_00_10;
 const BW_XL_D:           u8 = 0b0000_00_11;
 
-
-
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg: u8 = 0x00;     // Default is 0.
-    for &param in params {
-        match param {
-            Param::OdrXl(x) => {
-                reg |= match x {
-                    DataRate::PowerDown => ODR_XL_POWER_DOWN,
-                    DataRate::DR15Hz    => ODR_XL_14_9_HZ,
-                    DataRate::DR59Hz    => ODR_XL_59_5_HZ,
-                    DataRate::DR119Hz   => ODR_XL_119_HZ,
-                    DataRate::DR238Hz   => ODR_XL_238_HZ,
-                    DataRate::DR476Hz   => ODR_XL_476_HZ,
-                    DataRate::DR952Hz   => ODR_XL_952_HZ,
-                    DataRate::NA        => ODR_XL_NA,
-                }
-            }
-            Param::FsXl(x) => {
-                reg = reg & !FS_XL_MASK | match x {
-                    FsXl::Fs2  => FS_XL_2,
-                    FsXl::Fs4  => FS_XL_4,
-                    FsXl::Fs8  => FS_XL_8,
-                    FsXl::Fs16 => FS_XL_16,
-                }
-            }
-            Param::BwScalOdr(x) =>  reg = if x {
-                reg |  BW_SCAL_ODR
-            } else {
-                reg & !BW_SCAL_ODR
-            },
-            Param::BwXl(x) => {
-                reg |= match x {
-                    Bw::A => BW_XL_A,
-                    Bw::B => BW_XL_B,
-                    Bw::C => BW_XL_C,
-                    Bw::D => BW_XL_D,
-                }
-            }
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::CtrlReg6Xl(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct CtrlReg6XL {
+    odr_xl: DataRate,
+    fs_xl: FsXl,
+    bw_scal_odr: bool,
+    bw_xl: Bw,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::CtrlReg6Xl(r) => {
-            let odr_xl = Param::OdrXl(match r & ODR_XL_MASK {
-                ODR_XL_POWER_DOWN => DataRate::PowerDown,
-                ODR_XL_14_9_HZ    => DataRate::DR15Hz,
-                ODR_XL_59_5_HZ    => DataRate::DR59Hz,
-                ODR_XL_119_HZ     => DataRate::DR119Hz,
-                ODR_XL_238_HZ     => DataRate::DR238Hz,
-                ODR_XL_476_HZ     => DataRate::DR476Hz,
-                ODR_XL_952_HZ     => DataRate::DR952Hz,
-                ODR_XL_NA         => DataRate::NA,
-                _ =>  unreachable!(),
-            });
-            let fs_xl = Param::FsXl(match r & FS_XL_MASK {
-                FS_XL_2  => FsXl::Fs2,
-                FS_XL_4  => FsXl::Fs4,
-                FS_XL_8  => FsXl::Fs8,
-                FS_XL_16 => FsXl::Fs16,
-                _ =>  unreachable!(),
-            });
-            let bso = Param::BwScalOdr(r & BW_SCAL_ODR == BW_SCAL_ODR);
-            let bw_xl = Param::BwXl(match r & BW_XL_MASK {
-                BW_XL_A => Bw::A,
-                BW_XL_B => Bw::B,
-                BW_XL_C => Bw::C,
-                BW_XL_D => Bw::D,
-                _ =>  unreachable!(),
-            });
-            Ok(vec![odr_xl, fs_xl, bso, bw_xl])
-        }
-        _ => Err(()),
+impl Register<u8> for CtrlReg6XL {
+    fn addr(&self) -> Address {
+        CTRL_REG6_XL
     }
+    
+    fn default() -> Self {
+        CtrlReg6XL {
+            odr_xl: DataRate::default(),
+            fs_xl: FsXl::default(),
+            bw_scal_odr: false,
+            bw_xl: Bw::default(),
+        }
+    }
+
+    fn new(reg: u8) -> Self {
+        let odr_xl = match reg & ODR_XL_MASK {
+            ODR_XL_POWER_DOWN => DataRate::PowerDown,
+            ODR_XL_14_9_HZ    => DataRate::DR15Hz,
+            ODR_XL_59_5_HZ    => DataRate::DR59Hz,
+            ODR_XL_119_HZ     => DataRate::DR119Hz,
+            ODR_XL_238_HZ     => DataRate::DR238Hz,
+            ODR_XL_476_HZ     => DataRate::DR476Hz,
+            ODR_XL_952_HZ     => DataRate::DR952Hz,
+            ODR_XL_NA         => DataRate::NA,
+            _ =>  unreachable!(),
+        };
+        let fs_xl = match reg & FS_XL_MASK {
+            FS_XL_2  => FsXl::Fs2,
+            FS_XL_4  => FsXl::Fs4,
+            FS_XL_8  => FsXl::Fs8,
+            FS_XL_16 => FsXl::Fs16,
+            _ =>  unreachable!(),
+        };
+        let bw_xl = match reg & BW_XL_MASK {
+            BW_XL_A => Bw::A,
+            BW_XL_B => Bw::B,
+            BW_XL_C => Bw::C,
+            BW_XL_D => Bw::D,
+            _ =>  unreachable!(),
+        };
+        CtrlReg6XL {
+            odr_xl: odr_xl,
+            fs_xl: fs_xl,
+            bw_scal_odr: reg & BW_SCAL_ODR != 0,
+            bw_xl: bw_xl,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        let mut reg = match self.odr_xl {
+            DataRate::PowerDown => ODR_XL_POWER_DOWN,
+            DataRate::DR15Hz    => ODR_XL_14_9_HZ,
+            DataRate::DR59Hz    => ODR_XL_59_5_HZ,
+            DataRate::DR119Hz   => ODR_XL_119_HZ,
+            DataRate::DR238Hz   => ODR_XL_238_HZ,
+            DataRate::DR476Hz   => ODR_XL_476_HZ,
+            DataRate::DR952Hz   => ODR_XL_952_HZ,
+            DataRate::NA        => ODR_XL_NA,
+        };
+        reg |= match self.fs_xl {
+            FsXl::Fs2  => FS_XL_2,
+            FsXl::Fs4  => FS_XL_4,
+            FsXl::Fs8  => FS_XL_8,
+            FsXl::Fs16 => FS_XL_16,
+        };
+        if self.bw_scal_odr {reg |= BW_SCAL_ODR;}
+        reg |= match self.bw_xl {
+            Bw::A => BW_XL_A,
+            Bw::B => BW_XL_B,
+            Bw::C => BW_XL_C,
+            Bw::D => BW_XL_D,
+        };
+        reg
+    }
+}
+
+impl CtrlReg6XL {
+    pub fn set_odr_xl(&mut self, value: DataRate) {
+        self.odr_xl = value
+    }
+
+    pub fn odr_xl(&self) -> DataRate {
+        self.odr_xl
+    }
+
+    pub fn set_fs_xl(&mut self, value: FsXl) {
+        self.fs_xl = value
+    }
+
+    pub fn fs_xl(&self) -> FsXl {
+        self.fs_xl
+    }
+
+    pub fn set_bw_scal_odr(&mut self, value: bool) {self.bw_scal_odr = value}
+    pub fn bw_scal_odr(&self) -> bool {self.bw_scal_odr}
+
+    pub fn set_bw_xl(&mut self, value: Bw) {
+        self.bw_xl = value
+    }
+
+    pub fn bw_xl(&self) -> Bw {
+        self.bw_xl
+    }
+
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::CtrlReg6XL;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::CtrlReg6Xl(0x1A);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0x1A;
+        let r = CtrlReg6XL::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

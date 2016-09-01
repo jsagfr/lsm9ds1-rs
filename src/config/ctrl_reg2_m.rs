@@ -1,72 +1,88 @@
-use super::{Register, Param, FsM};
+use super::super::Address;
+use super::{Register, CTRL_REG2_M, FsM};
 
-const ERRORS:     u8 = 0b1_00_1_00_11;
-const FS_MASK:    u8 = 0b0_11_0_00_00;
-const FS_4_G:     u8 = 0b0_00_0_00_00;
-const FS_8_G:     u8 = 0b0_01_0_00_00;
-const FS_12_G:    u8 = 0b0_10_0_00_00;
-const FS_16_G:    u8 = 0b0_11_0_00_00;
-const REBOOT:     u8 = 0b0_00_0_10_00;
-const SOFT_RESET: u8 = 0b0_00_0_01_00;
+const ERRORS:       u8 = 0b1_00_1_00_11;
+const FS_MASK:      u8 = 0b0_11_0_00_00;
+const FS_4_G:       u8 = 0b0_00_0_00_00;
+const FS_8_G:       u8 = 0b0_01_0_00_00;
+const FS_12_G:      u8 = 0b0_10_0_00_00;
+const FS_16_G:      u8 = 0b0_11_0_00_00;
+const REBOOT_M:     u8 = 0b0_00_0_10_00;
+const SOFT_RESET_M: u8 = 0b0_00_0_01_00;
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg: u8 = 0x00;     // Default is 0.
-    for &param in params {
-        match param {
-            Param::FsM(x) => {
-                reg = reg & !FS_MASK | match x {
-                    FsM::Fs4  => FS_4_G,
-                    FsM::Fs8  => FS_8_G,
-                    FsM::Fs12 => FS_12_G,
-                    FsM::Fs16 => FS_16_G,
-                }
-            }
-            Param::RebootM(x) =>  reg = if x {
-                reg |  REBOOT
-            } else {
-                reg & !REBOOT
-            },
-            Param::SoftResetM(x) =>  reg = if x {
-                reg |  SOFT_RESET
-            } else {
-                reg & !SOFT_RESET
-            },
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::CtrlReg2M(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct CtrlReg2M {
+    fs_m: FsM,
+    reboot_m: bool,
+    soft_reset_m: bool,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::CtrlReg2M(r) => {
-            if r & ERRORS != 0 {
-                return Err(())
-            };
-            let reboot_m = Param::RebootM(r & REBOOT == REBOOT);
-            let soft_reset = Param::SoftResetM(r & SOFT_RESET == SOFT_RESET);
-            let fs = Param::FsM(match r & FS_MASK {
-                FS_4_G  => FsM::Fs4,
-                FS_8_G  => FsM::Fs8,
-                FS_12_G => FsM::Fs12,
-                FS_16_G => FsM::Fs16,
-                _ => unreachable!(),
-            });
-            Ok(vec![reboot_m, soft_reset, fs])
-        }
-        _ => Err(()),
+impl Register<u8> for CtrlReg2M {
+    fn addr(&self) -> Address {
+        CTRL_REG2_M
     }
+    
+    fn default() -> Self {
+        CtrlReg2M {
+            fs_m: FsM::default(),
+            reboot_m: false,
+            soft_reset_m: false,
+        }
+    }
+
+    fn new(reg: u8) -> Self {
+        let fs_m = match reg & FS_MASK {
+            FS_4_G  => FsM::Fs4,
+            FS_8_G  => FsM::Fs8,
+            FS_12_G => FsM::Fs12,
+            FS_16_G => FsM::Fs16,
+            _ => unreachable!(),
+        };
+        CtrlReg2M {
+            fs_m: fs_m,
+            reboot_m: reg & REBOOT_M != 0,
+            soft_reset_m: reg & SOFT_RESET_M != 0,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        let mut reg = match self.fs_m {
+            FsM::Fs4  => FS_4_G,
+            FsM::Fs8  => FS_8_G,
+            FsM::Fs12 => FS_12_G,
+            FsM::Fs16 => FS_16_G,
+        };
+        if self.reboot_m {reg |= REBOOT_M;}
+        if self.soft_reset_m {reg |= SOFT_RESET_M;}
+        reg
+    }
+}
+
+impl CtrlReg2M {
+    pub fn set_fs_m(&mut self, value: FsM) {
+        self.fs_m = value
+    }
+
+    pub fn fs_m(&self) -> FsM {
+        self.fs_m
+    }
+
+    pub fn set_reboot_m(&mut self, value: bool) {self.reboot_m = value}
+    pub fn reboot_m(&self) -> bool {self.reboot_m}
+    pub fn set_soft_reset_m(&mut self, value: bool) {self.soft_reset_m = value}
+    pub fn soft_reset_m(&self) -> bool {self.soft_reset_m}
+
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::CtrlReg2M;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::CtrlReg2M(0b0_11_0_11_00);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0b0_11_0_11_00;
+        let r = CtrlReg2M::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

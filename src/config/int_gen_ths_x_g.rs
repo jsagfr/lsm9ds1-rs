@@ -1,47 +1,67 @@
-use super::{Register, Param};
+use super::super::Address;
+use super::{Register, INT_GEN_THS_X_G};
 
-const DCRM_G:               u16 = 0b1000_0000_0000_0000;
+const DCRM_G_MASK:          u16 = 0b1000_0000_0000_0000;
 const INT_GEN_THS_X_G_MASK: u16 = 0b0111_1111_1111_1111;
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg = 0x0000;
-    println!("{:?}", params);
-    for &param in params {
-        match param {
-            Param::IntGenThsXG(x) if x & !INT_GEN_THS_X_G_MASK == 0 =>
-                reg = reg & !INT_GEN_THS_X_G_MASK | x,
-            Param::DcrmG(x) =>  reg = if x {
-                println!("{:?}", reg |  DCRM_G);
-                reg |  DCRM_G
-            } else {
-                reg & !DCRM_G
-            },
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::IntGenThsXG(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct IntGenThsXG {
+    dcrm_g: bool,
+    int_gen_ths_x_g: u16,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::IntGenThsXG(r) => {
-            let int_gen_ths_x_g = Param::IntGenThsXG(r & INT_GEN_THS_X_G_MASK);
-            let dcrm_g = Param::DcrmG(r & DCRM_G == DCRM_G);
-            Ok(vec![int_gen_ths_x_g, dcrm_g])
+impl Register<u16> for IntGenThsXG {
+    fn addr(&self) -> Address {
+        INT_GEN_THS_X_G
+    }
+    
+    fn default() -> Self {
+        IntGenThsXG {
+            int_gen_ths_x_g: 0,
+            dcrm_g: false,
         }
-        _ => Err(()),
+    }
+
+    fn new(reg: u16) -> Self {
+        IntGenThsXG {
+            int_gen_ths_x_g: reg & INT_GEN_THS_X_G_MASK,
+            dcrm_g: reg & DCRM_G_MASK != 0,
+        }
+    }
+
+    fn reg(&self) -> u16 {
+        self.int_gen_ths_x_g | if self.dcrm_g {DCRM_G_MASK} else {0}
+    }
+}
+
+impl IntGenThsXG {
+    pub fn set_int_gen_ths_x_g(&mut self, value: u16) {
+        assert!(value <= INT_GEN_THS_X_G_MASK);
+        self.int_gen_ths_x_g = value
+    }
+
+    pub fn int_gen_ths_x_g(&self) -> u16 {
+        self.int_gen_ths_x_g
+    }
+
+    pub fn set_dcrm_g(&mut self, value: bool) {
+        self.dcrm_g = value
+    }
+
+    pub fn dcrm_g(&self) -> bool {
+        self.dcrm_g
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::IntGenThsXG;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::IntGenThsXG(0xF21A);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u16 = 0xF21A;
+        let r = IntGenThsXG::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

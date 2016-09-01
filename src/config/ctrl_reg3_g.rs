@@ -1,63 +1,81 @@
-use super::{Register, Param};
+use super::super::Address;
+use super::{Register, CTRL_REG3_G};
 
-const ERRORS_MASK: u8 = 0b00_11_0000;
-const LP_MODE:     u8 = 0b10_00_0000;
-const HP_EN:       u8 = 0b01_00_0000;
-const HPCF_G_MASK: u8 = 0b00_00_1111;
+const ERRORS_MASK:  u8 = 0b00_11_0000;
+const LP_MODE_MASK: u8 = 0b10_00_0000;
+const HP_EN_MASK:   u8 = 0b01_00_0000;
+const HPCF_G_MASK:  u8 = 0b00_00_1111;
 
-
-/// HPCF_G to be investigated
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg: u8 = 0x00;     // Default is 0.
-    for &param in params {
-        match param {
-            Param::LPMode(x) => reg = if x {
-                        reg |  LP_MODE
-                    } else {
-                        reg & !LP_MODE
-                    },
-            Param::HpEn(x) => reg = if x {
-                        reg |  HP_EN
-                    } else {
-                        reg & !HP_EN
-                    },
-            Param::HpcfG(x) => {
-                if x & !HPCF_G_MASK != 0 {
-                    return Err(())
-                };
-                reg = reg & !HPCF_G_MASK | x;
-            }
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::CtrlReg3G(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct CtrlReg3G {
+    lp_mode: bool,
+    hp_en: bool,
+    hpcf_g: u8,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    let mut params = vec![];
-    match reg {
-        Register::CtrlReg3G(r) => {
-            if r & ERRORS_MASK != 0 {
-                return Err(())
-            };
-            params.push(Param::LPMode(r & LP_MODE == LP_MODE));
-            params.push(Param::HpEn(r & HP_EN == HP_EN));
-            params.push(Param::HpcfG(r & HPCF_G_MASK));
-        }
-        _ => return Err(()),
+impl Register<u8> for CtrlReg3G {
+    fn addr(&self) -> Address {
+        CTRL_REG3_G
     }
-    Ok(params)
+    
+    fn default() -> Self {
+        CtrlReg3G {
+            hpcf_g: 0,
+            lp_mode: false,
+            hp_en: false,
+        }
+    }
+
+    fn new(reg: u8) -> Self {
+        CtrlReg3G {
+            hpcf_g: reg & HPCF_G_MASK,
+            lp_mode: reg & LP_MODE_MASK != 0,
+            hp_en: reg & HP_EN_MASK != 0,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        self.hpcf_g | if self.lp_mode {LP_MODE_MASK} else {0} | if self.hp_en {HP_EN_MASK} else {0}
+    }
 }
+
+impl CtrlReg3G {
+    pub fn set_hpcf_g(&mut self, value: u8) {
+        assert!(value <= HPCF_G_MASK);
+        self.hpcf_g = value
+    }
+
+    pub fn hpcf_g(&self) -> u8 {
+        self.hpcf_g
+    }
+
+    pub fn set_lp_mode(&mut self, value: bool) {
+        self.lp_mode = value
+    }
+
+    pub fn lp_mode(&self) -> bool {
+        self.lp_mode
+    }
+
+    pub fn set_hp_en(&mut self, value: bool) {
+        self.hp_en = value
+    }
+
+    pub fn hp_en(&self) -> bool {
+        self.hp_en
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::CtrlReg3G;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::CtrlReg3G(0b1100_1010);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0b1100_1010;
+        let r = CtrlReg3G::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

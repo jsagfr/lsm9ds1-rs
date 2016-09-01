@@ -1,14 +1,53 @@
-reg_is_param!(IntGenThsXXl);
+use super::super::Address;
+use super::{Register, INT_GEN_THS_X_XL};
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct IntGenThsXXl {
+    int_gen_ths_x_xl: u8,
+}
+
+impl Register<u8> for IntGenThsXXl {
+    // const ADDR: Address = Address::RW(0x04);
+    fn addr(&self) -> Address {
+        INT_GEN_THS_X_XL
+    }
+    
+    fn default() -> IntGenThsXXl {
+        IntGenThsXXl {
+            int_gen_ths_x_xl: 0,
+        }
+    }
+
+    fn new(reg: u8) -> IntGenThsXXl {
+        IntGenThsXXl {
+            int_gen_ths_x_xl: reg,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        self.int_gen_ths_x_xl
+    }
+}
+
+impl IntGenThsXXl {
+    pub fn set_int_gen_ths_x_xl(&mut self, value: u8) {
+        self.int_gen_ths_x_xl = value;
+    }
+
+    pub fn int_gen_ths_x_xl(&self) -> u8 {
+        self.int_gen_ths_x_xl
+    }
+}
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::IntGenThsXXl;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::IntGenThsXXl(0x1A);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0x1A;
+        let r = IntGenThsXXl::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

@@ -1,39 +1,53 @@
-use super::{Register, Param};
+use super::super::Address;
+use super::{Register, ACT_DUR};
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg = 0x00;
-    for &param in params {
-        match param {
-            Param::ActDur(x) => reg = x,
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::ActDur(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct ActDur {
+    act_dur: u8,
 }
 
-/// Return a list of param for the *ACT_DUR* register.
-/// 
-/// # Errors
-///
-/// Return an error if the register is not a `Register::ActDur`.
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::ActDur(r) => {
-            Ok(vec![Param::ActDur(r)])
+impl Register<u8> for ActDur {
+    // const ADDR: Address = Address::RW(0x04);
+    fn addr(&self) -> Address {
+        ACT_DUR
+    }
+    
+    fn default() -> ActDur {
+        ActDur {
+            act_dur: 0,
         }
-        _ => Err(()),
+    }
+
+    fn new(reg: u8) -> ActDur {
+        ActDur {
+            act_dur: reg,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        self.act_dur
+    }
+}
+
+impl ActDur {
+    pub fn set_act_dur(&mut self, value: u8) {
+        self.act_dur = value;
+    }
+
+    pub fn act_dur(&self) -> u8 {
+        self.act_dur
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::ActDur;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::ActDur(0x1A);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0x1A;
+        let r = ActDur::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

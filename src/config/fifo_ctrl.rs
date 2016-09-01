@@ -1,4 +1,5 @@
-use super::{Register, Param, FMode};
+use super::super::Address;
+use super::{Register, FIFO_CTRL, FMode};
 
 const FMODE_MASK:          u8 = 0b111_00000;
 const FMODE_BY_PASS:       u8 = 0b000_00000;
@@ -8,59 +9,80 @@ const FMODE_BY_PASS_TRIG:  u8 = 0b100_00000;
 const FMODE_OVERWRITE:     u8 = 0b110_00000;
 const FIFO_TH_MASK:        u8 = 0b000_11111;
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg: u8 = 0x00;     // Default is 0.
-    for &param in params {
-        match param {
-            Param::Fth(x) => {
-                // Check value correctness ("u5")
-                match x & !FIFO_TH_MASK {
-                    0 =>  reg |= x,
-                    _ => return Err(()),
-                }
-            }
-            Param::FMode(x) => {
-                reg = reg & !FMODE_MASK | match x {
-                    FMode::ByPass => FMODE_BY_PASS,
-                    FMode::StopIfFull => FMODE_STOP_IF_FULL,
-                    FMode::ContinusTrig => FMODE_CONTINUS_TRIG,
-                    FMode::ByPassTrig => FMODE_BY_PASS_TRIG,
-                    FMode::Overwrite => FMODE_OVERWRITE,
-                }
-            }
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::FifoCtrl(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct FifoCtrl {
+    fth: u8,
+    f_mode: FMode,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::FifoCtrl(r) => {
-            let fmode = Param::FMode(match r & FMODE_MASK {
-                FMODE_BY_PASS => FMode::ByPass,
-                FMODE_STOP_IF_FULL => FMode::StopIfFull,
-                FMODE_CONTINUS_TRIG => FMode::ContinusTrig,
-                FMODE_BY_PASS_TRIG => FMode::ByPassTrig,
-                FMODE_OVERWRITE => FMode::Overwrite,
-                _ => unreachable!(),
-            });
-            let fth = Param::Fth(r & FIFO_TH_MASK);
-            Ok(vec![fmode, fth])
+impl Register<u8> for FifoCtrl {
+    fn addr(&self) -> Address {
+        FIFO_CTRL
+    }
+    
+    fn default() -> Self {
+        FifoCtrl {
+            fth: 0,
+            f_mode: FMode::default(),
         }
-        _ => Err(()),
+    }
+
+    fn new(reg: u8) -> Self {
+        let f_mode = match reg & FMODE_MASK {
+            FMODE_BY_PASS => FMode::ByPass,
+            FMODE_STOP_IF_FULL => FMode::StopIfFull,
+            FMODE_CONTINUS_TRIG => FMode::ContinusTrig,
+            FMODE_BY_PASS_TRIG => FMode::ByPassTrig,
+            FMODE_OVERWRITE => FMode::Overwrite,
+            _ => unreachable!(),
+        };
+        FifoCtrl {
+            fth: reg & FIFO_TH_MASK,
+            f_mode: f_mode,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        let mut reg = self.fth;
+        reg |= match self.f_mode {
+            FMode::ByPass => FMODE_BY_PASS,
+            FMode::StopIfFull => FMODE_STOP_IF_FULL,
+            FMode::ContinusTrig => FMODE_CONTINUS_TRIG,
+            FMode::ByPassTrig => FMODE_BY_PASS_TRIG,
+            FMode::Overwrite => FMODE_OVERWRITE,
+        };
+        reg
+    }
+}
+
+impl FifoCtrl {
+    pub fn set_fth(&mut self, value: u8) {
+        assert!(value <= FIFO_TH_MASK);
+        self.fth = value
+    }
+
+    pub fn fth(&self) -> u8 {
+        self.fth
+    }
+
+    pub fn set_f_mode(&mut self, value: FMode) {
+        self.f_mode = value
+    }
+
+    pub fn f_mode(&self) -> FMode {
+        self.f_mode
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::FifoCtrl;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::FifoCtrl(0b110_10010);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0b110_10010;
+        let r = FifoCtrl::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

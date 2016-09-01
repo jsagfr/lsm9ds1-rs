@@ -1,61 +1,67 @@
-use super::{Register, Param};
+use super::super::Address;
+use super::{Register, ACT_THS};
 
 const ACT_THS_MASK:  u8 = 0b0111_1111;
 const SLEEP_ON_MASK: u8 = 0b1000_0000;
 
-/// From params return a register with defaut values or values
-/// given in the param or error.
-/// 
-/// If all parameters are not supplies, defaut values are:
-/// * `Param::ActThs(0)`
-/// * `Param::SleepOn(State::Disable)`
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg: u8 = 0x00;     // Default is 0.
-    for &param in params {
-        match param {
-            Param::ActThs(x) => {
-                // Check value correctness ("u7")
-                match x & !ACT_THS_MASK {
-                    0 =>  reg |= x,
-                    _ => return Err(()),
-                }
-            }
-            Param::SleepOn(x) => reg = if x {
-                reg |  SLEEP_ON_MASK
-            } else {
-                reg & !SLEEP_ON_MASK
-            },
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::ActThs(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct ActThs {
+    act_ths: u8,
+    sleep_on: bool,
 }
 
-/// Return a list of param for the *act ths* register.
-/// 
-/// # Errors
-///
-/// Return an error if the register is not a `Register::ActThs`.
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::ActThs(r) => {
-            let sleep_on = Param::SleepOn(r & SLEEP_ON_MASK == SLEEP_ON_MASK);
-            let act_ths = Param::ActThs(r & ACT_THS_MASK);
-            Ok(vec![sleep_on, act_ths])
+impl Register<u8> for ActThs {
+    fn addr(&self) -> Address {
+        ACT_THS
+    }
+    
+    fn default() -> Self {
+        ActThs {
+            act_ths: 0,
+            sleep_on: false,
         }
-        _ => Err(()),
+    }
+
+    fn new(reg: u8) -> Self {
+        ActThs {
+            act_ths: reg & ACT_THS_MASK,
+            sleep_on: reg & SLEEP_ON_MASK != 0,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        self.act_ths | if self.sleep_on {SLEEP_ON_MASK} else {0}
+    }
+}
+
+impl ActThs {
+    pub fn set_act_ths(&mut self, value: u8) {
+        assert!(value <= ACT_THS_MASK);
+        self.act_ths = value
+    }
+
+    pub fn act_ths(&self) -> u8 {
+        self.act_ths
+    }
+
+    pub fn set_sleep_on(&mut self, value: bool) {
+        self.sleep_on = value
+    }
+
+    pub fn sleep_on(&self) -> bool {
+        self.sleep_on
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::ActThs;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::ActThs(0xF1);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0xF1;
+        let r = ActThs::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

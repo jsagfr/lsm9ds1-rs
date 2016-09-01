@@ -1,45 +1,55 @@
-use super::{Register, Param};
+use super::super::Address;
+use super::{Register, CTRL_REG5_M};
 
-const ERRORS: u8 = 0b1_0_111111;
-const BDU:    u8 = 0b0_1_000000;
+const ERRORS:                 u8 = 0b1_0_111111;
+const BLOCK_DATA_UPDATE_MASK: u8 = 0b0_1_000000;
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg: u8 = 0x00;     // Default is 0.
-    for &param in params {
-        match param {
-            Param::BlockDataUpdate(x) =>  reg = if x {
-                reg |  BDU
-            } else {
-                reg & !BDU
-            },
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::CtrlReg5M(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct CtrlReg5M {
+    block_data_update: bool,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::CtrlReg5M(r) => {
-            if r & ERRORS != 0 {
-                return Err(())
-            };
-            let bdu = Param::BlockDataUpdate(r & BDU == BDU);
-            Ok(vec![bdu])
+impl Register<u8> for CtrlReg5M {
+    fn addr(&self) -> Address {
+        CTRL_REG5_M
+    }
+    
+    fn default() -> Self {
+        CtrlReg5M {
+            block_data_update: false,
         }
-        _ => Err(()),
+    }
+
+    fn new(reg: u8) -> Self {
+        CtrlReg5M {
+            block_data_update: reg & BLOCK_DATA_UPDATE_MASK != 0,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        if self.block_data_update {BLOCK_DATA_UPDATE_MASK} else {0}
+    }
+}
+
+impl CtrlReg5M {
+    pub fn set_block_data_update(&mut self, value: bool) {
+        self.block_data_update = value
+    }
+
+    pub fn block_data_update(&self) -> bool {
+        self.block_data_update
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::CtrlReg5M;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::CtrlReg5M(0b0_1_000000);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0b0_1_000000;
+        let r = CtrlReg5M::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

@@ -1,37 +1,57 @@
-use super::{Register, Param};
+use super::super::Address;
+use super::{Register, INT_GEN_THS_Y_G};
 
 const INT_GEN_THS_Y_G_MASK: u16 = 0b0111_1111_1111_1111;
 
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg = 0x0000;
-    for &param in params {
-        match param {
-            Param::IntGenThsYG(x) if x & !INT_GEN_THS_Y_G_MASK == 0 =>
-                reg = reg & !INT_GEN_THS_Y_G_MASK | x,
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::IntGenThsYG(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct IntGenThsYG {
+    int_gen_ths_y_g: u16,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    match reg {
-        Register::IntGenThsYG(r) => {
-            Ok(vec![Param::IntGenThsYG(r)])
+impl Register<u16> for IntGenThsYG {
+    fn addr(&self) -> Address {
+        INT_GEN_THS_Y_G
+    }
+    
+    fn default() -> Self {
+        IntGenThsYG {
+            int_gen_ths_y_g: 0,
         }
-        _ => Err(()),
+    }
+
+    fn new(reg: u16) -> Self {
+        assert!(reg <= INT_GEN_THS_Y_G_MASK);
+        IntGenThsYG {
+            int_gen_ths_y_g: reg,
+        }
+    }
+
+    fn reg(&self) -> u16 {
+        self.int_gen_ths_y_g
+    }
+}
+
+impl IntGenThsYG {
+    
+    pub fn set_int_gen_ths_y_g(&mut self, value: u16) {
+        assert!(value <= INT_GEN_THS_Y_G_MASK);
+        self.int_gen_ths_y_g = value;
+    }
+
+    pub fn int_gen_ths_y_g(&self) -> u16 {
+        self.int_gen_ths_y_g
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::IntGenThsYG;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::IntGenThsYG(0x721A);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u16 = 0x721A;
+        let r = IntGenThsYG::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }

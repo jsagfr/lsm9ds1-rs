@@ -1,4 +1,5 @@
-use super::{Register, Param, Dec};
+use super::super::Address;
+use super::{Register, CTRL_REG5_XL, Dec};
 
 const ERRORS_MASK: u8 = 0b00_000_111;
 const ZEN_XL:      u8 = 0b00_100_000;
@@ -10,72 +11,85 @@ const DEC_2S:      u8 = 0b01_000_000;
 const DEC_4S:      u8 = 0b10_000_000;
 const DEC_8S:      u8 = 0b11_000_000;
 
-
-pub fn from_params(params: &[Param]) -> Result<Register,()> {
-    let mut reg: u8 = 0x00;     // Default is 0.
-    for &param in params {
-        match param {
-            Param::ZenXl(x) => reg = if x {
-                        reg |  ZEN_XL
-                    } else {
-                        reg & !ZEN_XL
-                    },
-            Param::YenXl(x) => reg = if x {
-                        reg |  YEN_XL
-                    } else {
-                        reg & !YEN_XL
-                    },
-            Param::XenXl(x) => reg = if x {
-                        reg |  XEN_XL
-                    } else {
-                        reg & !XEN_XL
-                    },
-            Param::Dec(x) => {
-                reg = reg & !DEC_MASK | match x {
-                    Dec::NoDec => NO_DEC,
-                    Dec::Dec2S => DEC_2S,
-                    Dec::Dec4S => DEC_4S,
-                    Dec::Dec8S => DEC_8S,
-                }
-            }
-            _ => return Err(()),
-        }
-    }
-    Ok(Register::CtrlReg5Xl(reg))
+#[derive(Clone, Debug, PartialEq)]
+pub struct CtrlReg5XL {
+    zen_xl: bool,
+    yen_xl: bool,
+    xen_xl: bool,
+    dec: Dec,
 }
 
-pub fn from_register(reg: Register) -> Result<Vec<Param>,()> {
-    let mut params = vec![];
-    match reg {
-        Register::CtrlReg5Xl(r) => {
-            if r & ERRORS_MASK != 0 {
-                return Err(())
-            };
-            params.push(Param::Dec(match r & DEC_MASK {
-                    NO_DEC => Dec::NoDec,
-                    DEC_2S => Dec::Dec2S,
-                    DEC_4S => Dec::Dec4S,
-                    DEC_8S => Dec::Dec8S,
-                _ =>  unreachable!(),
-            }));
-            params.push(Param::XenXl(r & XEN_XL == XEN_XL));
-            params.push(Param::YenXl(r & YEN_XL == YEN_XL));
-            params.push(Param::ZenXl(r & ZEN_XL == ZEN_XL));
-            Ok(params)
-        }
-        _ => Err(()),
+impl Register<u8> for CtrlReg5XL {
+    fn addr(&self) -> Address {
+        CTRL_REG5_XL
     }
+    
+    fn default() -> Self {
+        CtrlReg5XL {
+            zen_xl: false,
+            yen_xl: false,
+            xen_xl: false,
+            dec: Dec::default(),
+        }
+    }
+
+    fn new(reg: u8) -> Self {
+        let dec = match reg & DEC_MASK {
+            NO_DEC => Dec::NoDec,
+            DEC_2S => Dec::Dec2S,
+            DEC_4S => Dec::Dec4S,
+            DEC_8S => Dec::Dec8S,
+            _ =>  unreachable!(),
+        };
+        CtrlReg5XL {
+            zen_xl: reg & ZEN_XL != 0,
+            yen_xl: reg & YEN_XL != 0,
+            xen_xl: reg & XEN_XL != 0,
+            dec: dec,
+        }
+    }
+
+    fn reg(&self) -> u8 {
+        let mut reg = match self.dec {
+            Dec::NoDec => NO_DEC,
+            Dec::Dec2S => DEC_2S,
+            Dec::Dec4S => DEC_4S,
+            Dec::Dec8S => DEC_8S,
+        };
+        if self.zen_xl {reg |= ZEN_XL;}
+        if self.yen_xl {reg |= YEN_XL;}
+        if self.xen_xl {reg |= XEN_XL;}
+        reg
+    }
+}
+
+impl CtrlReg5XL {
+    pub fn set_dec(&mut self, value: Dec) {
+        self.dec = value
+    }
+
+    pub fn dec(&self) -> Dec {
+        self.dec
+    }
+
+    pub fn set_zen_xl(&mut self, value: bool) {self.zen_xl = value}
+    pub fn zen_xl(&self) -> bool {self.zen_xl}
+    pub fn set_yen_xl(&mut self, value: bool) {self.yen_xl = value}
+    pub fn yen_xl(&self) -> bool {self.yen_xl}
+    pub fn set_xen_xl(&mut self, value: bool) {self.xen_xl = value}
+    pub fn xen_xl(&self) -> bool {self.xen_xl}
+
 }
 
 #[cfg(test)]
 mod tests {
-    use super::super::{Register};
-    use super::{from_register, from_params};
+    use super::CtrlReg5XL;
+    use super::super::Register;
 
     #[test]
     fn it_works() {
-        let r1 = Register::CtrlReg5Xl(0b10111000);
-        let r2 = from_params(&from_register(r1).unwrap()).unwrap();
-        assert_eq!(r1, r2);
+        const REG: u8 = 0b10111000;
+        let r = CtrlReg5XL::new(REG);
+        assert_eq!(r.reg(), REG);
     }
 }
