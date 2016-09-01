@@ -1,6 +1,6 @@
 macro_rules! enum_with_type {
     ( $(#[$Eattr:meta])* enum $E:ident,
-      $(#[$ETattr:meta])* enum_type $ET:ident {
+      $(#[$ETattr:meta])* enum_type $ET:ident : $Ne:expr ; {
         $($(#[$eattr:meta])* variant $e:ident => $et:ty ),+
             $(,)*
     }) => {
@@ -19,6 +19,15 @@ macro_rules! enum_with_type {
                 match self {
                     $( $E::$e(_) => $ET::$e, )+
                 }
+            }
+        }
+
+        impl $ET {
+            pub fn iterator() -> Iter<'static, $ET> {
+                static ALL: [$ET; $Ne] = [
+                    $( $ET::$e, )+
+                ];
+                ALL.into_iter()
             }
         }
     }

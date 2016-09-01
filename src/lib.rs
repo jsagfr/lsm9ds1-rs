@@ -2,12 +2,9 @@
 
 #![allow(dead_code)]
 // extern crate i2cdev;
-// #[macro_use]
-// extern crate bitflags;
 
-
-// mod register;
 pub mod config;
+<<<<<<< HEAD
 use config::{
     Config, PatchConfig, Register,
     DataRate,
@@ -25,6 +22,9 @@ use config::{
     Md,
 };
 // use config::{Config, Param, Register};
+=======
+use config::{Config, Param, ParamType, Register, RegisterType, ConfRegBuilder};
+>>>>>>> c96ebe66b569ef757bfc896a95dbdb37ad76cc66
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Address{
@@ -38,25 +38,30 @@ pub enum Address{
 
 // use register::{Address};
 
-// pub trait Lsm9ds1Device {
-//     fn read(&mut self, address: Address) -> Result<u8,()>;
-//     fn readword(&mut self, address: Address) -> Result<u8,()>;
-//     fn write(&mut self, address: Address, value: u8) -> Result<(),()>;
-//     fn writeword(&mut self, address: Address, value: u16) -> Result<(),()>;
-// }
+pub trait Lsm9ds1Device {
+    fn read(&mut self, address: Address) -> Result<u8,()>;
+    fn readword(&mut self, address: Address) -> Result<u16,()>;
+    fn write(&mut self, address: Address, value: u8) -> Result<(),()>;
+    fn writeword(&mut self, address: Address, value: u16) -> Result<(),()>;
+}
 
 
+<<<<<<< HEAD
 pub struct Lsm9ds1<I: Interface> {
     config: Config,
     interface: I
+=======
+pub struct Lsm9ds1<D: Lsm9ds1Device> {
+    config: Config,
+    device: D,
+>>>>>>> c96ebe66b569ef757bfc896a95dbdb37ad76cc66
 }
 
-enum Interrupts{}
-// enum ParamType{
-    
-// }
-// enum Param{}
 
+enum Interrupts{}
+    
+
+<<<<<<< HEAD
 impl<I: Interface> Lsm9ds1<I> {
     pub fn temp(&mut self) -> Result<f32,()> { unimplemented!() }
     pub fn lx(&mut self) -> Result<f32,()> { unimplemented!() }
@@ -75,6 +80,76 @@ impl<I: Interface> Lsm9ds1<I> {
     pub fn apply_config(&mut self, config: Config) -> Result<(),()> { unimplemented!() }
     pub fn apply_patch_config(&mut self, patch: PatchConfig) -> Result<(),()> { unimplemented!() }
     pub fn read_config(&mut self) -> Result<(),()> { unimplemented!() }
+=======
+impl<D: Lsm9ds1Device> Lsm9ds1<D> {
+    fn temp(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn lx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn ly(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn lz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gy(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn gz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn mx(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn my(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn mz(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn fifo(&mut self) -> Result<f32,()> { unimplemented!() }
+    fn linterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
+    fn ginterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
+
+    fn params<'a>(&'a self) -> Vec<&'a Param> { self.config.params() }
+    fn param(&mut self, param_type: ParamType) -> Option<&Param> {
+        self.config.param(param_type)
+    }
+    fn apply_config(&mut self, config: Config) {
+        unimplemented!()
+    }
+    fn read_all_config(&mut self) {
+        let mut v = vec![];
+        for r in RegisterType::iterator() {
+            v.push(match *r {
+                RegisterType::ActThs => Register::ActThs(self.device.read(r.address()).unwrap()),
+                RegisterType::ActDur => Register::ActDur(self.device.read(r.address()).unwrap()),
+                RegisterType::IntGenCfgXl => Register::IntGenCfgXl(self.device.read(r.address()).unwrap()),
+                RegisterType::IntGenThsXXl => Register::IntGenThsXXl(self.device.read(r.address()).unwrap()),
+                RegisterType::IntGenThsYXl => Register::IntGenThsYXl(self.device.read(r.address()).unwrap()),
+                RegisterType::IntGenThsZXl => Register::IntGenThsZXl(self.device.read(r.address()).unwrap()),
+                RegisterType::IntGenDurXl => Register::IntGenDurXl(self.device.read(r.address()).unwrap()),
+                RegisterType::ReferenceG => Register::ReferenceG(self.device.read(r.address()).unwrap()),
+                RegisterType::Int1Ctrl => Register::Int1Ctrl(self.device.read(r.address()).unwrap()),
+                RegisterType::Int2Ctrl => Register::Int2Ctrl(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg1G => Register::CtrlReg1G(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg2G => Register::CtrlReg2G(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg3G => Register::CtrlReg3G(self.device.read(r.address()).unwrap()),
+                RegisterType::OrientCfgG => Register::OrientCfgG(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg4 => Register::CtrlReg4(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg5Xl => Register::CtrlReg5Xl(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg6Xl => Register::CtrlReg6Xl(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg7Xl => Register::CtrlReg7Xl(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg8 => Register::CtrlReg8(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg9 => Register::CtrlReg9(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg10 => Register::CtrlReg10(self.device.read(r.address()).unwrap()),
+                RegisterType::FifoCtrl => Register::FifoCtrl(self.device.read(r.address()).unwrap()),
+                RegisterType::IntGenCfgG => Register::IntGenCfgG(self.device.read(r.address()).unwrap()),
+                RegisterType::IntGenThsXG => Register::IntGenThsXG(self.device.readword(r.address()).unwrap()),
+                RegisterType::IntGenThsYG => Register::IntGenThsYG(self.device.readword(r.address()).unwrap()),
+                RegisterType::IntGenThsZG => Register::IntGenThsZG(self.device.readword(r.address()).unwrap()),
+                RegisterType::IntGenDurG => Register::IntGenDurG(self.device.read(r.address()).unwrap()),
+                RegisterType::OffsetXRegM => Register::OffsetXRegM(self.device.readword(r.address()).unwrap()),
+                RegisterType::OffsetYRegM => Register::OffsetYRegM(self.device.readword(r.address()).unwrap()),
+                RegisterType::OffsetZRegM => Register::OffsetZRegM(self.device.readword(r.address()).unwrap()),
+                RegisterType::CtrlReg1M => Register::CtrlReg1M(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg2M => Register::CtrlReg2M(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg3M => Register::CtrlReg3M(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg4M => Register::CtrlReg4M(self.device.read(r.address()).unwrap()),
+                RegisterType::CtrlReg5M => Register::CtrlReg5M(self.device.read(r.address()).unwrap()),
+                RegisterType::IntCfgM => Register::IntCfgM(self.device.read(r.address()).unwrap()),
+            });
+        }
+        let conf = ConfRegBuilder::new()
+            .set_all(&v)
+            .build();
+    }
+>>>>>>> c96ebe66b569ef757bfc896a95dbdb37ad76cc66
     
 
     // fn status(&mut self) -> Result<Status,()> { unimplemented!() }
