@@ -341,7 +341,7 @@ pub struct Config {
 }
 
 impl Config {
-    fn default() -> Config {
+    pub fn default() -> Config {
         Config {
             act_ths: act_ths::ActThs::default(),
             act_dur: act_dur::ActDur::default(),
