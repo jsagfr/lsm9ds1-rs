@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, CTRL_REG6_XL, DataRate, FsXl, Bw};
 
 const ODR_XL_MASK:       u8 = 0b111_00000;
@@ -31,7 +30,7 @@ pub struct CtrlReg6XL {
 }
 
 impl Register<u8> for CtrlReg6XL {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         CTRL_REG6_XL
     }
     

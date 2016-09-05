@@ -1,7 +1,9 @@
 // TODO: Waitning for: #![feature(associated_consts)] in main stream
-
 #![allow(dead_code)]
-// extern crate i2cdev;
+
+extern crate i2cdev;
+pub mod i2c;
+
 #[macro_use]
 mod macros;
 // extern crate bitflags;
@@ -27,39 +29,101 @@ use config::{
 };
 // use config::{Config, Param, Register};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Address{
-    RW(u8),
-    RW16(u8),
-    R(u8),
-    R16(u8),
-}
-
-
-
-// use register::{Address};
-
-// pub trait Lsm9ds1Device {
-//     fn read(&mut self, address: Address) -> Result<u8,()>;
-//     fn readword(&mut self, address: Address) -> Result<u8,()>;
-//     fn write(&mut self, address: Address, value: u8) -> Result<(),()>;
-//     fn writeword(&mut self, address: Address, value: u16) -> Result<(),()>;
+// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// pub enum Address{
+//     RW(u8),
+//     RW16(u8),
+//     R(u8),
+//     R16(u8),
 // }
 
+// pub trait ReadableAddress<T> {
+//     fn read_addr(&self) -> u8;
+// }
+
+// pub trait WritableAddress<T> {
+//     fn write_addr(&self) -> u8;
+// }
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// pub struct ReadAddress(u8);
+
+// impl ReadableAddress<u8> for ReadAddress {
+//     fn read_addr(&self) -> u8 {
+//         let &ReadAddress(value) = self;
+//         return value
+//     }
+// }
+
+// impl ReadableAddress<u16> for ReadAddress {
+//     fn read_addr(&self) -> u8 {
+//         let &ReadAddress(value) = self;
+//         return value
+//     }
+// }
+
+// pub trait ReadInterface<T, A:ReadableAddress<T>> {
+//     fn read(&mut self, address: &A) -> Result<T,()>;
+// }
+// pub trait WriteInterface<T, A:ReadableAddress<T>> {
+//     fn write(&mut self, address: &A, value: T) -> Result<(),()>;
+// }
+pub trait Interface {
+    fn read(&mut self, address: u8) -> Result<u8,()>;
+    fn read16(&mut self, address: u8) -> Result<u16,()>;
+    fn write(&mut self, address: u8, value: u8) -> Result<(),()>;
+    fn write16(&mut self, address: u8, value: u16) -> Result<(),()>;
+}
 
 pub struct Lsm9ds1<I: Interface> {
     config: Config,
-    interface: I
+    interface: I,
 }
 
 enum Interrupts{}
-// enum ParamType{
-    
-// }
-// enum Param{}
 
+
+const WHO_AM_I:   u8 = 0x0F;
+const WHO_AM_I_M: u8 = 0x0F;
+const I_AM:       u8 = 0b0110_1000;
+const I_AM_M:     u8 = 0b0011_1101;
+
+pub fn check_device<I: Interface>(interface: &mut I) -> Result<(),()> {
+    let g_xl = try!(interface.read(WHO_AM_I));
+    match g_xl {
+        I_AM => Ok(()),
+        _ => Err(())
+    }
+    // let m = try!(interface.read(CHECK_M));
+    // match (g_xl, m) {
+    //     (ID_G_XL, ID_M) => Ok(()),
+    //     (_, ID_M) => Err(()),
+    //     (ID_G_XL, _) => Err(()),
+    //     (_, _) => Err(()),
+    // }
+}
 
 impl<I: Interface> Lsm9ds1<I> {
+    pub fn new(mut interface: I, config: Config) -> Result<Lsm9ds1<I>,()> {
+        try!(check_device(&mut interface));
+        let mut lsm9ds1 = Lsm9ds1 {
+            config: config,
+            interface: interface,
+        };
+        try!(lsm9ds1.re_apply_config());
+        Ok(lsm9ds1)
+    }
+
+    pub fn from_interface(mut interface: I) -> Result<Lsm9ds1<I>,()> {
+        try!(check_device(&mut interface));
+        let mut lsm9ds1 = Lsm9ds1 {
+            config: config::Config::default(),
+            interface: interface,
+        };
+        try!(lsm9ds1.re_read_config());
+        Ok(lsm9ds1)
+    }
+
     pub fn temp(&mut self) -> Result<f32,()> { unimplemented!() }
     pub fn lx(&mut self) -> Result<f32,()> { unimplemented!() }
     pub fn ly(&mut self) -> Result<f32,()> { unimplemented!() }
@@ -74,9 +138,162 @@ impl<I: Interface> Lsm9ds1<I> {
     // pub fn linterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
     // pub fn ginterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
 
-    pub fn apply_config(&mut self, config: Config) -> Result<(),()> { unimplemented!() }
+    pub fn re_apply_config(&mut self) -> Result<(),()> {
+        try!(self.interface.write(self.config.act_ths.addr(), self.config.act_ths.reg()));
+        try!(self.interface.write(self.config.act_dur.addr(), self.config.act_dur.reg()));
+        try!(self.interface.write(self.config.int_gen_cfg_xl.addr(), self.config.int_gen_cfg_xl.reg()));
+        try!(self.interface.write(self.config.int_gen_ths_x_xl.addr(), self.config.int_gen_ths_x_xl.reg()));
+        try!(self.interface.write(self.config.int_gen_ths_y_xl.addr(), self.config.int_gen_ths_y_xl.reg()));
+        try!(self.interface.write(self.config.int_gen_ths_z_xl.addr(), self.config.int_gen_ths_z_xl.reg()));
+        try!(self.interface.write(self.config.int_gen_dur_xl.addr(), self.config.int_gen_dur_xl.reg()));
+        try!(self.interface.write(self.config.reference_g.addr(), self.config.reference_g.reg()));
+        try!(self.interface.write(self.config.int1_ctrl.addr(), self.config.int1_ctrl.reg()));
+        try!(self.interface.write(self.config.int2_ctrl.addr(), self.config.int2_ctrl.reg()));
+        try!(self.interface.write(self.config.ctrl_reg1_g.addr(), self.config.ctrl_reg1_g.reg()));
+        try!(self.interface.write(self.config.ctrl_reg2_g.addr(), self.config.ctrl_reg2_g.reg()));
+        try!(self.interface.write(self.config.ctrl_reg3_g.addr(), self.config.ctrl_reg3_g.reg()));
+        try!(self.interface.write(self.config.orient_cfg_g.addr(), self.config.orient_cfg_g.reg()));
+        try!(self.interface.write(self.config.ctrl_reg4.addr(), self.config.ctrl_reg4.reg()));
+        try!(self.interface.write(self.config.ctrl_reg5_xl.addr(), self.config.ctrl_reg5_xl.reg()));
+        try!(self.interface.write(self.config.ctrl_reg6_xl.addr(), self.config.ctrl_reg6_xl.reg()));
+        try!(self.interface.write(self.config.ctrl_reg7_xl.addr(), self.config.ctrl_reg7_xl.reg()));
+        try!(self.interface.write(self.config.ctrl_reg8.addr(), self.config.ctrl_reg8.reg()));
+        try!(self.interface.write(self.config.ctrl_reg9.addr(), self.config.ctrl_reg9.reg()));
+        try!(self.interface.write(self.config.ctrl_reg10.addr(), self.config.ctrl_reg10.reg()));
+        try!(self.interface.write(self.config.fifo_ctrl.addr(), self.config.fifo_ctrl.reg()));
+        try!(self.interface.write(self.config.int_gen_cfg_g.addr(), self.config.int_gen_cfg_g.reg()));
+        try!(self.interface.write16(self.config.int_gen_ths_x_g.addr(), self.config.int_gen_ths_x_g.reg()));
+        try!(self.interface.write16(self.config.int_gen_ths_y_g.addr(), self.config.int_gen_ths_y_g.reg()));
+        try!(self.interface.write16(self.config.int_gen_ths_z_g.addr(), self.config.int_gen_ths_z_g.reg()));
+        try!(self.interface.write(self.config.int_gen_dur_g.addr(), self.config.int_gen_dur_g.reg()));
+        // try!(self.interface.write16(self.config.offset_x_reg_m.addr(), self.config.offset_x_reg_m.reg()));
+        // try!(self.interface.write16(self.config.offset_y_reg_m.addr(), self.config.offset_y_reg_m.reg()));
+        // try!(self.interface.write16(self.config.offset_z_reg_m.addr(), self.config.offset_z_reg_m.reg()));
+        // try!(self.interface.write(self.config.ctrl_reg1_m.addr(), self.config.ctrl_reg1_m.reg()));
+        // try!(self.interface.write(self.config.ctrl_reg2_m.addr(), self.config.ctrl_reg2_m.reg()));
+        // try!(self.interface.write(self.config.ctrl_reg3_m.addr(), self.config.ctrl_reg3_m.reg()));
+        // try!(self.interface.write(self.config.ctrl_reg4_m.addr(), self.config.ctrl_reg4_m.reg()));
+        // try!(self.interface.write(self.config.ctrl_reg5_m.addr(), self.config.ctrl_reg5_m.reg()));
+        // try!(self.interface.write(self.config.int_cfg_m.addr(), self.config.int_cfg_m.reg()));
+        Ok(())
+    }
+
+    pub fn apply_config(&mut self, config: Config) -> Result<(),()> {
+        try!(self.interface.write(config.act_ths.addr(), config.act_ths.reg()));
+        try!(self.interface.write(config.act_dur.addr(), config.act_dur.reg()));
+        try!(self.interface.write(config.int_gen_cfg_xl.addr(), config.int_gen_cfg_xl.reg()));
+        try!(self.interface.write(config.int_gen_ths_x_xl.addr(), config.int_gen_ths_x_xl.reg()));
+        try!(self.interface.write(config.int_gen_ths_y_xl.addr(), config.int_gen_ths_y_xl.reg()));
+        try!(self.interface.write(config.int_gen_ths_z_xl.addr(), config.int_gen_ths_z_xl.reg()));
+        try!(self.interface.write(config.int_gen_dur_xl.addr(), config.int_gen_dur_xl.reg()));
+        try!(self.interface.write(config.reference_g.addr(), config.reference_g.reg()));
+        try!(self.interface.write(config.int1_ctrl.addr(), config.int1_ctrl.reg()));
+        try!(self.interface.write(config.int2_ctrl.addr(), config.int2_ctrl.reg()));
+        try!(self.interface.write(config.ctrl_reg1_g.addr(), config.ctrl_reg1_g.reg()));
+        try!(self.interface.write(config.ctrl_reg2_g.addr(), config.ctrl_reg2_g.reg()));
+        try!(self.interface.write(config.ctrl_reg3_g.addr(), config.ctrl_reg3_g.reg()));
+        try!(self.interface.write(config.orient_cfg_g.addr(), config.orient_cfg_g.reg()));
+        try!(self.interface.write(config.ctrl_reg4.addr(), config.ctrl_reg4.reg()));
+        try!(self.interface.write(config.ctrl_reg5_xl.addr(), config.ctrl_reg5_xl.reg()));
+        try!(self.interface.write(config.ctrl_reg6_xl.addr(), config.ctrl_reg6_xl.reg()));
+        try!(self.interface.write(config.ctrl_reg7_xl.addr(), config.ctrl_reg7_xl.reg()));
+        try!(self.interface.write(config.ctrl_reg8.addr(), config.ctrl_reg8.reg()));
+        try!(self.interface.write(config.ctrl_reg9.addr(), config.ctrl_reg9.reg()));
+        try!(self.interface.write(config.ctrl_reg10.addr(), config.ctrl_reg10.reg()));
+        try!(self.interface.write(config.fifo_ctrl.addr(), config.fifo_ctrl.reg()));
+        try!(self.interface.write(config.int_gen_cfg_g.addr(), config.int_gen_cfg_g.reg()));
+        try!(self.interface.write16(config.int_gen_ths_x_g.addr(), config.int_gen_ths_x_g.reg()));
+        try!(self.interface.write16(config.int_gen_ths_y_g.addr(), config.int_gen_ths_y_g.reg()));
+        try!(self.interface.write16(config.int_gen_ths_z_g.addr(), config.int_gen_ths_z_g.reg()));
+        try!(self.interface.write(config.int_gen_dur_g.addr(), config.int_gen_dur_g.reg()));
+        // try!(self.interface.write16(config.offset_x_reg_m.addr(), config.offset_x_reg_m.reg()));
+        // try!(self.interface.write16(config.offset_y_reg_m.addr(), config.offset_y_reg_m.reg()));
+        // try!(self.interface.write16(config.offset_z_reg_m.addr(), config.offset_z_reg_m.reg()));
+        // try!(self.interface.write(config.ctrl_reg1_m.addr(), config.ctrl_reg1_m.reg()));
+        // try!(self.interface.write(config.ctrl_reg2_m.addr(), config.ctrl_reg2_m.reg()));
+        // try!(self.interface.write(config.ctrl_reg3_m.addr(), config.ctrl_reg3_m.reg()));
+        // try!(self.interface.write(config.ctrl_reg4_m.addr(), config.ctrl_reg4_m.reg()));
+        // try!(self.interface.write(config.ctrl_reg5_m.addr(), config.ctrl_reg5_m.reg()));
+        // try!(self.interface.write(config.int_cfg_m.addr(), config.int_cfg_m.reg()));
+        self.config = config;
+        Ok(())
+    }
     pub fn apply_patch_config(&mut self, patch: PatchConfig) -> Result<(),()> { unimplemented!() }
-    pub fn read_config(&mut self) -> Result<(),()> { unimplemented!() }
+    pub fn re_read_config(&mut self) -> Result<(),()> {
+        self.config.act_ths = config::act_ths::ActThs::new(
+            try!(self.interface.read(self.config.act_ths.addr())));
+        self.config.act_dur = config::act_dur::ActDur::new(
+            try!(self.interface.read(self.config.act_dur.addr())));
+        self.config.int_gen_cfg_xl = config::int_gen_cfg_xl::IntGenCfgXl::new(
+            try!(self.interface.read(self.config.int_gen_cfg_xl.addr())));
+        self.config.int_gen_ths_x_xl = config::int_gen_ths_x_xl::IntGenThsXXl::new(
+            try!(self.interface.read(self.config.int_gen_ths_x_xl.addr())));
+        self.config.int_gen_ths_y_xl = config::int_gen_ths_y_xl::IntGenThsYXl::new(
+            try!(self.interface.read(self.config.int_gen_ths_y_xl.addr())));
+        self.config.int_gen_ths_z_xl = config::int_gen_ths_z_xl::IntGenThsZXl::new(
+            try!(self.interface.read(self.config.int_gen_ths_z_xl.addr())));
+        self.config.int_gen_dur_xl = config::int_gen_dur_xl::IntGenDurXl::new(
+            try!(self.interface.read(self.config.int_gen_dur_xl.addr())));
+        self.config.reference_g = config::reference_g::ReferenceG::new(
+            try!(self.interface.read(self.config.reference_g.addr())));
+        self.config.int1_ctrl = config::int1_ctrl::Int1Ctrl::new(
+            try!(self.interface.read(self.config.int1_ctrl.addr())));
+        self.config.int2_ctrl = config::int2_ctrl::Int2Ctrl::new(
+            try!(self.interface.read(self.config.int2_ctrl.addr())));
+        self.config.ctrl_reg1_g = config::ctrl_reg1_g::CtrlReg1G::new(
+            try!(self.interface.read(self.config.ctrl_reg1_g.addr())));
+        self.config.ctrl_reg2_g = config::ctrl_reg2_g::CtrlReg2G::new(
+            try!(self.interface.read(self.config.ctrl_reg2_g.addr())));
+        self.config.ctrl_reg3_g = config::ctrl_reg3_g::CtrlReg3G::new(
+            try!(self.interface.read(self.config.ctrl_reg3_g.addr())));
+        self.config.orient_cfg_g = config::orient_cfg_g::OrientCfgG::new(
+            try!(self.interface.read(self.config.orient_cfg_g.addr())));
+        self.config.ctrl_reg4 = config::ctrl_reg4::CtrlReg4::new(
+            try!(self.interface.read(self.config.ctrl_reg4.addr())));
+        self.config.ctrl_reg5_xl = config::ctrl_reg5_xl::CtrlReg5XL::new(
+            try!(self.interface.read(self.config.ctrl_reg5_xl.addr())));
+        self.config.ctrl_reg6_xl = config::ctrl_reg6_xl::CtrlReg6XL::new(
+            try!(self.interface.read(self.config.ctrl_reg6_xl.addr())));
+        self.config.ctrl_reg7_xl = config::ctrl_reg7_xl::CtrlReg7XL::new(
+            try!(self.interface.read(self.config.ctrl_reg7_xl.addr())));
+        self.config.ctrl_reg8 = config::ctrl_reg8::CtrlReg8::new(
+            try!(self.interface.read(self.config.ctrl_reg8.addr())));
+        self.config.ctrl_reg9 = config::ctrl_reg9::CtrlReg9::new(
+            try!(self.interface.read(self.config.ctrl_reg9.addr())));
+        self.config.ctrl_reg10 = config::ctrl_reg10::CtrlReg10::new(
+            try!(self.interface.read(self.config.ctrl_reg10.addr())));
+        self.config.fifo_ctrl = config::fifo_ctrl::FifoCtrl::new(
+            try!(self.interface.read(self.config.fifo_ctrl.addr())));
+        self.config.int_gen_cfg_g = config::int_gen_cfg_g::IntGenCfgG::new(
+            try!(self.interface.read(self.config.int_gen_cfg_g.addr())));
+        self.config.int_gen_ths_x_g = config::int_gen_ths_x_g::IntGenThsXG::new(
+            try!(self.interface.read16(self.config.int_gen_ths_x_g.addr())));
+        self.config.int_gen_ths_y_g = config::int_gen_ths_y_g::IntGenThsYG::new(
+            try!(self.interface.read16(self.config.int_gen_ths_y_g.addr())));
+        self.config.int_gen_ths_z_g = config::int_gen_ths_z_g::IntGenThsZG::new(
+            try!(self.interface.read16(self.config.int_gen_ths_z_g.addr())));
+        self.config.int_gen_dur_g = config::int_gen_dur_g::IntGenDurG::new(
+            try!(self.interface.read(self.config.int_gen_dur_g.addr())));
+        // self.config.offset_x_reg_m = config::offset_x_reg_m::OffsetXRegM::new(
+        //     try!(self.interface.read16(self.config.offset_x_reg_m.addr())));
+        // self.config.offset_y_reg_m = config::offset_y_reg_m::OffsetYRegM::new(
+        //     try!(self.interface.read16(self.config.offset_y_reg_m.addr())));
+        // self.config.offset_z_reg_m = config::offset_z_reg_m::OffsetZRegM::new(
+        //     try!(self.interface.read16(self.config.offset_z_reg_m.addr())));
+        // self.config.ctrl_reg1_m = config::ctrl_reg1_m::CtrlReg1M::new(
+        //     try!(self.interface.read(self.config.ctrl_reg1_m.addr())));
+        // self.config.ctrl_reg2_m = config::ctrl_reg2_m::CtrlReg2M::new(
+        //     try!(self.interface.read(self.config.ctrl_reg2_m.addr())));
+        // self.config.ctrl_reg3_m = config::ctrl_reg3_m::CtrlReg3M::new(
+        //     try!(self.interface.read(self.config.ctrl_reg3_m.addr())));
+        // self.config.ctrl_reg4_m = config::ctrl_reg4_m::CtrlReg4M::new(
+        //     try!(self.interface.read(self.config.ctrl_reg4_m.addr())));
+        // self.config.ctrl_reg5_m = config::ctrl_reg5_m::CtrlReg5M::new(
+        //     try!(self.interface.read(self.config.ctrl_reg5_m.addr())));
+        // self.config.int_cfg_m = config::int_cfg_m::IntCfgM::new(
+        //     try!(self.interface.read(self.config.int_cfg_m.addr())));
+        Ok(())
+    }
     
 
     // fn status(&mut self) -> Result<Status,()> { unimplemented!() }
@@ -519,22 +736,22 @@ impl<I: Interface> Lsm9ds1<I> {
 
     pub fn dcrm_g(&self) -> bool {self.config.dcrm_g()}
     pub fn set_dcrm_g(&mut self, value: bool) -> Result<(),()> {
-        set_value!(self, int_gen_ths_x_g, set_dcrm_g, value)
+        set_value16!(self, int_gen_ths_x_g, set_dcrm_g, value)
     }
 
     pub fn int_gen_ths_x_g(&self) -> u16 {self.config.int_gen_ths_x_g()}
     pub fn set_int_gen_ths_x_g(&mut self, value: u16) -> Result<(),()> {
-        set_value!(self, int_gen_ths_x_g, set_int_gen_ths_x_g, value)
+        set_value16!(self, int_gen_ths_x_g, set_int_gen_ths_x_g, value)
     }
 
     pub fn int_gen_ths_y_g(&self) -> u16 {self.config.int_gen_ths_y_g()}
     pub fn set_int_gen_ths_y_g(&mut self, value: u16) -> Result<(),()> {
-        set_value!(self, int_gen_ths_y_g, set_int_gen_ths_y_g, value)
+        set_value16!(self, int_gen_ths_y_g, set_int_gen_ths_y_g, value)
     }
 
     pub fn int_gen_ths_z_g(&self) -> u16 {self.config.int_gen_ths_z_g()}
     pub fn set_int_gen_ths_z_g(&mut self, value: u16) -> Result<(),()> {
-        set_value!(self, int_gen_ths_z_g, set_int_gen_ths_z_g, value)
+        set_value16!(self, int_gen_ths_z_g, set_int_gen_ths_z_g, value)
     }
 
     pub fn wait_g(&self) -> bool {self.config.wait_g()}
@@ -549,17 +766,17 @@ impl<I: Interface> Lsm9ds1<I> {
 
     pub fn offset_x_reg_m(&self) -> u16 {self.config.offset_x_reg_m()}
     pub fn set_offset_x_reg_m(&mut self, value: u16) -> Result<(),()> {
-        set_value!(self, offset_x_reg_m, set_offset_x_reg_m, value)
+        set_value16!(self, offset_x_reg_m, set_offset_x_reg_m, value)
     }
 
     pub fn offset_y_reg_m(&self) -> u16 {self.config.offset_y_reg_m()}
     pub fn set_offset_y_reg_m(&mut self, value: u16) -> Result<(),()> {
-        set_value!(self, offset_y_reg_m, set_offset_y_reg_m, value)
+        set_value16!(self, offset_y_reg_m, set_offset_y_reg_m, value)
     }
 
     pub fn offset_z_reg_m(&self) -> u16 {self.config.offset_z_reg_m()}
     pub fn set_offset_z_reg_m(&mut self, value: u16) -> Result<(),()> {
-        set_value!(self, offset_z_reg_m, set_offset_z_reg_m, value)
+        set_value16!(self, offset_z_reg_m, set_offset_z_reg_m, value)
     }
 
     pub fn op_mode(&self) -> OpMode {self.config.op_mode()}
@@ -664,83 +881,6 @@ impl<I: Interface> Lsm9ds1<I> {
 
 }
 
-// pub mod accelerometer;
-// pub mod i2c;
-
-// use std::i16::MAX;
-// use register::{ReadAddress, ReadWordAddress, Write};
-// use accelerometer::{Reg6, Reg6FS, OUT_X_ADDRESS_R, OUT_Y_ADDRESS_R, OUT_Z_ADDRESS_R};
-
-pub trait Interface {
-    // // TODO: Result<>
-    // fn read(&mut self, address: ReadAddress) -> u8;
-    // // TODO: Result<>
-    // fn readword(&mut self, address: ReadWordAddress) -> u16;
-    // // TODO: Result<>
-    fn write<T>(&mut self, address: Address, value: T) -> Result<(),()>;
-}
-
-// pub enum Cmd {
-//     Reg6(Reg6),
-// }
-
-
-// pub struct Lsm9ds1<D: Device> {
-//     reg6: Option<Reg6>,
-//     device: D,
-// }
-
-// impl<D: Device> Lsm9ds1<D> {
-    
-//     pub fn new(device: D) -> Lsm9ds1<D> {
-//         Lsm9ds1 {
-//             reg6: None,
-//             device: device,
-//         }
-//     }
-    
-//     // TODO: Result<>
-//     fn scale_acc(&self, value: i16) -> Option<f32> {
-//         match self.reg6 {
-//             Some(r) => {
-//                 let s = match r.fs {
-//                     Reg6FS::Acc2g  =>  2.0,
-//                     Reg6FS::Acc4g  =>  4.0,
-//                     Reg6FS::Acc8g  =>  8.0,
-//                     Reg6FS::Acc16g => 16.0,
-//                 };
-//                 Some(s * (value as f32) / (MAX as f32))
-//             }
-//             None => None,
-//         }
-//     }
-    
-//     pub fn x(&mut self) -> Option<f32> {
-//         let raw_x = self.device.readword(OUT_X_ADDRESS_R);
-//         self.scale_acc(raw_x as i16)
-//     }
-    
-//     pub fn y(&mut self) -> Option<f32> {
-//         let raw_y = self.device.readword(OUT_Y_ADDRESS_R);
-//         self.scale_acc(raw_y as i16)
-//     }
-    
-//     pub fn z(&mut self) -> Option<f32> {
-//         let raw_z = self.device.readword(OUT_Z_ADDRESS_R);
-//         self.scale_acc(raw_z as i16)
-//     }
-
-//     pub fn write(&mut self, cmd: Cmd) {
-//         match cmd {
-//             Cmd::Reg6(c) => {
-//                 self.device.write(c);
-//                 // TODO: set reg6 only if write occurs without error
-//                 self.reg6 = Some(c);
-//             }
-//         };
-//     }
-
-// }
 
 #[cfg(test)]
 mod tests {

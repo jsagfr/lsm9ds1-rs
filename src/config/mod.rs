@@ -1,5 +1,3 @@
-use super::Address;
-
 pub mod act_ths;
 pub mod act_dur;
 pub mod int_gen_cfg_xl;
@@ -254,47 +252,48 @@ impl Md {
 }
 
 
-const ACT_THS:          Address = Address::RW(0x04);
-const ACT_DUR:          Address = Address::RW(0x05);
-const INT_GEN_CFG_XL:   Address = Address::RW(0x06);
-const INT_GEN_THS_X_XL: Address = Address::RW(0x07);
-const INT_GEN_THS_Y_XL: Address = Address::RW(0x08);
-const INT_GEN_THS_Z_XL: Address = Address::RW(0x09);
-const INT_GEN_DUR_XL:   Address = Address::RW(0x0A);
-const REFERENCE_G:      Address = Address::RW(0x0B);
-const INT1_CTRL:        Address = Address::RW(0x0C);
-const INT2_CTRL:        Address = Address::RW(0x0D);
-const CTRL_REG1_G:      Address = Address::RW(0x10);
-const CTRL_REG2_G:      Address = Address::RW(0x11);
-const CTRL_REG3_G:      Address = Address::RW(0x12);
-const ORIENT_CFG_G:     Address = Address::RW(0x13);
-const INT_GEN_SRC_G:    Address = Address::RW(0x14);
-const CTRL_REG4:        Address = Address::RW(0x1E);
-const CTRL_REG5_XL:     Address = Address::RW(0x1F);
-const CTRL_REG6_XL:     Address = Address::RW(0x20);
-const CTRL_REG7_XL:     Address = Address::RW(0x21);
-const CTRL_REG8:        Address = Address::RW(0x22);
-const CTRL_REG9:        Address = Address::RW(0x23);
-const CTRL_REG10:       Address = Address::RW(0x24);
-const FIFO_CTRL:        Address = Address::RW(0x2E);
-const INT_GEN_CFG_G:    Address = Address::RW(0x30);
-const INT_GEN_THS_X_G:  Address = Address::RW16(0x31);
-const INT_GEN_THS_Y_G:  Address = Address::RW16(0x33);
-const INT_GEN_THS_Z_G:  Address = Address::RW16(0x35);
-const INT_GEN_DUR_G:    Address = Address::RW(0x37);
-const OFFSET_X_REG_M:   Address = Address::RW16(0x05);
-const OFFSET_Y_REG_M:   Address = Address::RW16(0x07);
-const OFFSET_Z_REG_M:   Address = Address::RW16(0x09);
-const CTRL_REG1_M:      Address = Address::RW(0x20);
-const CTRL_REG2_M:      Address = Address::RW(0x21);
-const CTRL_REG3_M:      Address = Address::RW(0x22);
-const CTRL_REG4_M:      Address = Address::RW(0x23);
-const CTRL_REG5_M:      Address = Address::RW(0x24);
-const OUT_X_M:          Address = Address::R16(0x28);
-const OUT_Y_M:          Address = Address::R16(0x2A);
-const OUT_Z_M:          Address = Address::R16(0x2C);
-const INT_CFG_M:        Address = Address::RW(0x30);
-const INT_THS_M:        Address = Address::R16(0x32);
+const ACT_THS:          u8 = 0x04;
+const ACT_DUR:          u8 = 0x05;
+const INT_GEN_CFG_XL:   u8 = 0x06;
+const INT_GEN_THS_X_XL: u8 = 0x07;
+const INT_GEN_THS_Y_XL: u8 = 0x08;
+const INT_GEN_THS_Z_XL: u8 = 0x09;
+const INT_GEN_DUR_XL:   u8 = 0x0A;
+const REFERENCE_G:      u8 = 0x0B;
+const INT1_CTRL:        u8 = 0x0C;
+const INT2_CTRL:        u8 = 0x0D;
+const CTRL_REG1_G:      u8 = 0x10;
+const CTRL_REG2_G:      u8 = 0x11;
+const CTRL_REG3_G:      u8 = 0x12;
+const ORIENT_CFG_G:     u8 = 0x13;
+const INT_GEN_SRC_G:    u8 = 0x14;
+const CTRL_REG4:        u8 = 0x1E;
+const CTRL_REG5_XL:     u8 = 0x1F;
+const CTRL_REG6_XL:     u8 = 0x20;
+const CTRL_REG7_XL:     u8 = 0x21;
+const CTRL_REG8:        u8 = 0x22;
+const CTRL_REG9:        u8 = 0x23;
+const CTRL_REG10:       u8 = 0x24;
+const FIFO_CTRL:        u8 = 0x2E;
+const INT_GEN_CFG_G:    u8 = 0x30;
+const INT_GEN_THS_X_G:  u8 = 0x31;
+const INT_GEN_THS_Y_G:  u8 = 0x33;
+const INT_GEN_THS_Z_G:  u8 = 0x35;
+const INT_GEN_DUR_G:    u8 = 0x37;
+const OFFSET_X_REG_M:   u8 = 0x05;
+const OFFSET_Y_REG_M:   u8 = 0x07;
+const OFFSET_Z_REG_M:   u8 = 0x09;
+const CTRL_REG1_M:      u8 = 0x20;
+const CTRL_REG2_M:      u8 = 0x21;
+const CTRL_REG3_M:      u8 = 0x22;
+const CTRL_REG4_M:      u8 = 0x23;
+const CTRL_REG5_M:      u8 = 0x24;
+const OUT_X_M:          u8 = 0x28;
+const OUT_Y_M:          u8 = 0x2A;
+const OUT_Z_M:          u8 = 0x2C;
+const INT_CFG_M:        u8 = 0x30;
+const INT_THS_M:        u8 = 0x32;
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct PatchConfig {
@@ -617,7 +616,7 @@ impl Config {
 }
 
 pub trait Register<RegSize> {
-    fn addr(&self) -> Address;
+    fn addr(&self) -> u8;
     
     fn default() -> Self;
 

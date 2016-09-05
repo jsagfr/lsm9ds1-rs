@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, CTRL_REG8};
 
 const BOOT:       u8 = 0b10000000;
@@ -24,7 +23,7 @@ pub struct CtrlReg8 {
 }
 
 impl Register<u8> for CtrlReg8 {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         CTRL_REG8
     }
     

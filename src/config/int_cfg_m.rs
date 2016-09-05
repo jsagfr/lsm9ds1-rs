@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, INT_CFG_M};
 
 const XIEN:   u8 = 0b10000000;
@@ -21,7 +20,7 @@ pub struct IntCfgM {
 }
 
 impl Register<u8> for IntCfgM {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         INT_CFG_M
     }
     
