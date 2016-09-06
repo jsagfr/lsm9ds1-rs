@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-=======
-#![allow(dead_code)]
-use std::collections::HashMap;
-use std::iter::Iterator;
-use std::slice::Iter;
-
->>>>>>> c96ebe66b569ef757bfc896a95dbdb37ad76cc66
-use super::Address;
-
 pub mod act_ths;
 pub mod act_dur;
 pub mod int_gen_cfg_xl;
@@ -78,6 +68,17 @@ impl GyroScale {
     fn default() -> GyroScale {
         GyroScale::FS245Dps
     }
+
+        
+    pub fn value(self) -> f32 {
+        match self {
+            GyroScale::NA => 0.0,
+            GyroScale::FS245Dps => 245.0,
+            GyroScale::FS500Dps => 500.0,
+            GyroScale::FS2000Dps => 2000.0,
+        }
+    }
+
 }
 
 /// Clarifications needed
@@ -229,8 +230,17 @@ pub enum FsM {
 }
 
 impl FsM {
-    fn default() -> FsM {
+    pub fn default() -> FsM {
         FsM::Fs4
+    }
+    
+    pub fn value(self) -> f32 {
+        match self {
+            FsM::Fs4 => 4.0,
+            FsM::Fs8 => 8.0,
+            FsM::Fs12 => 12.0,
+            FsM::Fs16 => 16.0,
+        }
     }
 }
 
@@ -243,8 +253,17 @@ pub enum FsXl {
 }
 
 impl FsXl {
-    fn default() -> FsXl {
+    pub fn default() -> FsXl {
         FsXl::Fs2
+    }
+    
+    pub fn value(self) -> f32 {
+        match self {
+            FsXl::Fs2 => 2.0,
+            FsXl::Fs4 => 4.0,
+            FsXl::Fs8 => 8.0,
+            FsXl::Fs16 => 16.0,
+        }
     }
 }
 
@@ -255,505 +274,55 @@ pub enum Md {
     PowerDown,
 }
 
-<<<<<<< HEAD
 impl Md {
     fn default() -> Md {
         Md::PowerDown
     }
 }
 
-=======
 
-enum_with_type!{
-    /// Parameters used to configure or given when reading a
-    /// *LSM9DS1*.
-    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-    enum Param,
-    /// Parameters type used to get a *LSM9DS1* configuration.
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    enum_type ParamType : 116; {
-        // ActThs
-        /// Gyroscope inactivity threshold.
-        ///
-        /// __TODO: Question: is accelerometer concerned?__
-        /// 
-        /// * Possible values in `0..2**7`
-        /// * Default value is `0`
-        variant ActThs => u8,
-        /// Gyroscope operating mode during inactivity.
-        ///
-        /// * Default value is `Disable`
-        variant SleepOn => bool,
+const ACT_THS:          u8 = 0x04;
+const ACT_DUR:          u8 = 0x05;
+const INT_GEN_CFG_XL:   u8 = 0x06;
+const INT_GEN_THS_X_XL: u8 = 0x07;
+const INT_GEN_THS_Y_XL: u8 = 0x08;
+const INT_GEN_THS_Z_XL: u8 = 0x09;
+const INT_GEN_DUR_XL:   u8 = 0x0A;
+const REFERENCE_G:      u8 = 0x0B;
+const INT1_CTRL:        u8 = 0x0C;
+const INT2_CTRL:        u8 = 0x0D;
+const CTRL_REG1_G:      u8 = 0x10;
+const CTRL_REG2_G:      u8 = 0x11;
+const CTRL_REG3_G:      u8 = 0x12;
+const ORIENT_CFG_G:     u8 = 0x13;
+const INT_GEN_SRC_G:    u8 = 0x14;
+const CTRL_REG4:        u8 = 0x1E;
+const CTRL_REG5_XL:     u8 = 0x1F;
+const CTRL_REG6_XL:     u8 = 0x20;
+const CTRL_REG7_XL:     u8 = 0x21;
+const CTRL_REG8:        u8 = 0x22;
+const CTRL_REG9:        u8 = 0x23;
+const CTRL_REG10:       u8 = 0x24;
+const FIFO_CTRL:        u8 = 0x2E;
+const INT_GEN_CFG_G:    u8 = 0x30;
+const INT_GEN_THS_X_G:  u8 = 0x31;
+const INT_GEN_THS_Y_G:  u8 = 0x33;
+const INT_GEN_THS_Z_G:  u8 = 0x35;
+const INT_GEN_DUR_G:    u8 = 0x37;
+const OFFSET_X_REG_M:   u8 = 0x05;
+const OFFSET_Y_REG_M:   u8 = 0x07;
+const OFFSET_Z_REG_M:   u8 = 0x09;
+const CTRL_REG1_M:      u8 = 0x20;
+const CTRL_REG2_M:      u8 = 0x21;
+const CTRL_REG3_M:      u8 = 0x22;
+const CTRL_REG4_M:      u8 = 0x23;
+const CTRL_REG5_M:      u8 = 0x24;
+const OUT_X_M:          u8 = 0x28;
+const OUT_Y_M:          u8 = 0x2A;
+const OUT_Z_M:          u8 = 0x2C;
+const INT_CFG_M:        u8 = 0x30;
+const INT_THS_M:        u8 = 0x32;
 
-        // ActDur
-        /// Gyroscope inactivity duration.
-        ///
-        /// __TODO: Question: is accelerometer concerned?__
-        /// 
-        /// * Possible values in `u8`
-        /// * Default value is `0`
-        variant ActDur => u8,
-        
-        // IntGenCfgXl 
-        /// AND/OR combination of accelerometer's interrupt events.
-        /// 
-        /// * Default value: `Or`
-        variant AoiXl => bool,
-        variant Detect6D => bool,
-        variant ZhieXl => bool,
-        variant ZlieXl => bool,
-        variant YhieXl => bool,
-        variant YlieXl => bool,
-        variant XhieXl => bool,
-        variant XlieXl => bool,
-
-        // IntGenThsXXl
-        variant IntGenThsXXl => u8,
-
-        // IntGenThsYXl
-        variant IntGenThsYXl => u8,
-
-        // IntGenThsZXl
-        variant IntGenThsZXl => u8,
-
-        // IntGenDurXl
-        variant WaitXl => bool,
-        /// Linear acceleration sensor interrupt duration.
-        variant DurXl => u8,
-
-        // ReferenceG
-        variant ReferenceG => u8,
-
-        // Int1Ctrl register
-        variant Int1IgG => bool,
-        variant Int1IgXl => bool,
-        variant Int1Fss5 => bool,
-        variant Int1Ovr => bool,
-        variant Int1Fth => bool,
-        variant Int1Boot => bool,
-        variant Int1DrdyG => bool,
-        variant Int1DrdyXl => bool,
-
-        // Int2Ctrl register:
-        variant Int2Inact => bool,
-        variant Int2Fss5 => bool,
-        variant Int2Ovr => bool,
-        variant Int2Fth => bool,
-        variant Int2DrdyTemp => bool,
-        variant Int2DrdyG => bool,
-        variant Int2DrdyXl => bool,
-
-        // CtrlReg1G
-        variant OdrG => DataRate,
-        variant FsG => GyroScale,
-        variant BwG => Bw,
-
-        // CtrlReg2G
-        variant IntSel => IntSel,
-        variant OutSel => OutSel,
-
-        // CtrlReg3G
-        variant LPMode => bool,
-        variant HpEn => bool,
-        variant HpcfG => u8,
-
-        // OrientCfgG
-        variant SignXG => bool,
-        variant SignYG => bool,
-        variant SignZG => bool,
-        /// Carification needed for Orient which is probably not a
-        /// simple u3...
-        variant Orient => u8,
-
-        // CtrlReg4
-        variant ZenG => bool,
-        variant YenG => bool,
-        variant XenG => bool,
-        variant LirXl1 => bool,
-        variant I4dXl1 => bool,
-
-        // CtrlReg5XL
-        variant ZenXl => bool,
-        variant YenXl => bool,
-        variant XenXl => bool,
-        variant Dec => Dec,
-
-        // CtrlReg6XL
-        variant OdrXl => DataRate,
-        variant FsXl => FsXl,
-        variant BwScalOdr => bool,
-        variant BwXl => Bw,
-
-        // CtrlReg7XL
-        variant HighRes => bool,
-        variant XlDigitalCf => DigCutoffFreq,
-        variant FilteredDataSel => bool,
-        variant HighPassIntSens => bool,   
-        
-        // CtrlReg8
-        variant Boot => bool,
-        variant Bdu => bool,
-        variant HLactive => bool,
-        variant PpOd => bool,
-        variant Sim => bool,
-        variant IfAddInc => bool,
-        variant Ble => bool,
-        variant SwReset => bool,
-
-        // CtrlReg9
-        variant SleepG => bool,
-        variant FifoTempEn => bool,
-        variant DrdyMaskBit => bool,
-        variant I2cDisable => bool,
-        variant FifoEn => bool,
-        variant StopOnFth => bool,
-
-        // CtrlReg10
-        variant StG => bool,
-        variant StXl => bool,
-
-        // FifoCtrl
-        variant Fth => u8,
-        variant FMode => FMode,
-        
-        // IntGenCfgG
-        variant AoiG => bool,
-        variant LirG => bool,
-        variant ZhieG => bool,
-        variant ZlieG => bool,
-        variant YhieG => bool,
-        variant YlieG => bool,
-        variant XhieG => bool,
-        variant XlieG => bool,
-        
-        // IntGenThsXG
-        variant DcrmG => bool,
-        variant IntGenThsXG => u16,
-
-        // IntGenThsYG
-        variant IntGenThsYG => u16,
-
-        // IntGenThsZG
-        variant IntGenThsZG => u16,
-
-        // IntGenDurG
-        variant WaitG => bool,
-        variant DurG => u8,
-
-        // OffsetXRegM
-        variant OffsetXRegM => u16,
-
-        // OffsetYRegM
-        variant OffsetYRegM => u16,
-        
-        // OffsetZRegM
-        variant OffsetZRegM => u16,
-
-        // CtrlReg1M
-        variant OpMode => OpMode,
-        variant OutputDataRate => OutputDataRate,
-        variant TempComp => bool,
-        variant SelfTest => bool,
-
-        // CtrlReg2M
-        variant FsM => FsM,
-        variant RebootM => bool,
-        variant SoftResetM => bool,
-
-        // CtrlReg3M
-        variant Md => Md,
-        variant I2cDisableM => bool,
-        variant LowPowerM => bool,
-        variant SimM => bool,
-        
-        // CtrlReg4M
-        variant OpModeZ => OpMode,
-        variant BigLittleEndian => bool,
-        
-        // CtrlReg5M
-        variant BlockDataUpdate => bool,
-
-        // IntCfgM
-        variant Xien => bool,
-        variant Yien => bool,
-        variant Zien => bool,
-        variant Iea => bool,
-        variant Iel => bool,
-        variant Ien => bool,
-    }
-}
-
-impl Param {
-    pub fn reg_type(&self) -> RegisterType {
-        match self.type_of() {
-            ParamType::ActThs  => RegisterType::ActThs,
-            ParamType::SleepOn => RegisterType::ActThs,
-
-            ParamType::ActDur => RegisterType::ActDur,
-            
-            ParamType::AoiXl    => RegisterType::IntGenCfgXl,
-            ParamType::Detect6D => RegisterType::IntGenCfgXl,
-            ParamType::ZhieXl   => RegisterType::IntGenCfgXl,
-            ParamType::ZlieXl   => RegisterType::IntGenCfgXl,
-            ParamType::YhieXl   => RegisterType::IntGenCfgXl,
-            ParamType::YlieXl   => RegisterType::IntGenCfgXl,
-            ParamType::XhieXl   => RegisterType::IntGenCfgXl,
-            ParamType::XlieXl   => RegisterType::IntGenCfgXl,
-
-            ParamType::IntGenThsXXl => RegisterType::IntGenThsXXl,
-            ParamType::IntGenThsYXl => RegisterType::IntGenThsYXl,
-            ParamType::IntGenThsZXl => RegisterType::IntGenThsZXl,
-
-            ParamType::WaitXl => RegisterType::IntGenDurXl,
-            ParamType::DurXl  => RegisterType::IntGenDurXl,
-
-            ParamType::ReferenceG => RegisterType::ReferenceG,
-
-            // Int1Ctrl register
-            ParamType::Int1IgG    => RegisterType::Int1Ctrl,
-            ParamType::Int1IgXl   => RegisterType::Int1Ctrl,
-            ParamType::Int1Fss5   => RegisterType::Int1Ctrl,
-            ParamType::Int1Ovr    => RegisterType::Int1Ctrl,
-            ParamType::Int1Fth    => RegisterType::Int1Ctrl,
-            ParamType::Int1Boot   => RegisterType::Int1Ctrl,
-            ParamType::Int1DrdyG  => RegisterType::Int1Ctrl,
-            ParamType::Int1DrdyXl => RegisterType::Int1Ctrl,
-
-            // Int2Ctrl register:
-            ParamType::Int2Inact    => RegisterType::Int2Ctrl,
-            ParamType::Int2Fss5     => RegisterType::Int2Ctrl,
-            ParamType::Int2Ovr      => RegisterType::Int2Ctrl,
-            ParamType::Int2Fth      => RegisterType::Int2Ctrl,
-            ParamType::Int2DrdyTemp => RegisterType::Int2Ctrl,
-            ParamType::Int2DrdyG    => RegisterType::Int2Ctrl,
-            ParamType::Int2DrdyXl   => RegisterType::Int2Ctrl,
-
-            // CtrlReg1G
-            ParamType::OdrG => RegisterType::CtrlReg1G,
-            ParamType::FsG  => RegisterType::CtrlReg1G,
-            ParamType::BwG  => RegisterType::CtrlReg1G,
-
-            // CtrlReg2G
-            ParamType::IntSel => RegisterType::CtrlReg2G,
-            ParamType::OutSel => RegisterType::CtrlReg2G,
-
-            // CtrlReg3G
-            ParamType::LPMode => RegisterType::CtrlReg3G,
-            ParamType::HpEn   => RegisterType::CtrlReg3G,
-            ParamType::HpcfG  => RegisterType::CtrlReg3G,
-
-            // OrientCfgG
-            ParamType::SignXG => RegisterType::OrientCfgG,
-            ParamType::SignYG => RegisterType::OrientCfgG,
-            ParamType::SignZG => RegisterType::OrientCfgG,
-            ParamType::Orient => RegisterType::OrientCfgG,
-
-            // CtrlReg4
-            ParamType::ZenG   => RegisterType::CtrlReg4,
-            ParamType::YenG   => RegisterType::CtrlReg4,
-            ParamType::XenG   => RegisterType::CtrlReg4,
-            ParamType::LirXl1 => RegisterType::CtrlReg4,
-            ParamType::I4dXl1 => RegisterType::CtrlReg4,
-
-            // CtrlReg5XL
-            ParamType::ZenXl => RegisterType::CtrlReg5Xl,
-            ParamType::YenXl => RegisterType::CtrlReg5Xl,
-            ParamType::XenXl => RegisterType::CtrlReg5Xl,
-            ParamType::Dec   => RegisterType::CtrlReg5Xl,
-
-            // CtrlReg6XL
-            ParamType::OdrXl     => RegisterType::CtrlReg6Xl,
-            ParamType::FsXl      => RegisterType::CtrlReg6Xl,
-            ParamType::BwScalOdr => RegisterType::CtrlReg6Xl,
-            ParamType::BwXl      => RegisterType::CtrlReg6Xl,
-
-            // CtrlReg7XL
-            ParamType::HighRes         => RegisterType::CtrlReg7Xl,
-            ParamType::XlDigitalCf     => RegisterType::CtrlReg7Xl,
-            ParamType::FilteredDataSel => RegisterType::CtrlReg7Xl,
-            ParamType::HighPassIntSens => RegisterType::CtrlReg7Xl, 
-            
-            // CtrlReg8
-            ParamType::Boot     => RegisterType::CtrlReg8,
-            ParamType::Bdu      => RegisterType::CtrlReg8,
-            ParamType::HLactive => RegisterType::CtrlReg8,
-            ParamType::PpOd     => RegisterType::CtrlReg8,
-            ParamType::Sim      => RegisterType::CtrlReg8,
-            ParamType::IfAddInc => RegisterType::CtrlReg8,
-            ParamType::Ble      => RegisterType::CtrlReg8,
-            ParamType::SwReset  => RegisterType::CtrlReg8,
-
-            // CtrlReg9
-            ParamType::SleepG      => RegisterType::CtrlReg9,
-            ParamType::FifoTempEn  => RegisterType::CtrlReg9,
-            ParamType::DrdyMaskBit => RegisterType::CtrlReg9,
-            ParamType::I2cDisable  => RegisterType::CtrlReg9,
-            ParamType::FifoEn      => RegisterType::CtrlReg9,
-            ParamType::StopOnFth   => RegisterType::CtrlReg9,
-
-            // CtrlReg10
-            ParamType::StG  => RegisterType::CtrlReg10,
-            ParamType::StXl => RegisterType::CtrlReg10,
-
-            // FifoCtrl
-            ParamType::Fth   => RegisterType::FifoCtrl,
-            ParamType::FMode => RegisterType::FifoCtrl,
-            
-            // IntGenCfgG
-            ParamType::AoiG  => RegisterType::IntGenCfgG,
-            ParamType::LirG  => RegisterType::IntGenCfgG,
-            ParamType::ZhieG => RegisterType::IntGenCfgG,
-            ParamType::ZlieG => RegisterType::IntGenCfgG,
-            ParamType::YhieG => RegisterType::IntGenCfgG,
-            ParamType::YlieG => RegisterType::IntGenCfgG,
-            ParamType::XhieG => RegisterType::IntGenCfgG,
-            ParamType::XlieG => RegisterType::IntGenCfgG,
-            
-            // IntGenThsXG
-            ParamType::DcrmG       => RegisterType::IntGenThsXG,
-            ParamType::IntGenThsXG => RegisterType::IntGenThsXG,
-
-            // IntGenThsYG
-            ParamType::IntGenThsYG => RegisterType::IntGenThsYG,
-
-            // IntGenThsZG
-            ParamType::IntGenThsZG => RegisterType::IntGenThsZG,
-
-            // IntGenDurG
-            ParamType::WaitG => RegisterType::IntGenDurG,
-            ParamType::DurG  => RegisterType::IntGenDurG,
-
-            // OffsetXRegM
-            ParamType::OffsetXRegM => RegisterType::OffsetXRegM,
-
-            // OffsetYRegM
-            ParamType::OffsetYRegM => RegisterType::OffsetYRegM,
-            
-            // OffsetZRegM
-            ParamType::OffsetZRegM => RegisterType::OffsetZRegM,
-
-            // CtrlReg1M
-            ParamType::OpMode         => RegisterType::CtrlReg1M,
-            ParamType::OutputDataRate => RegisterType::CtrlReg1M,
-            ParamType::TempComp       => RegisterType::CtrlReg1M,
-            ParamType::SelfTest       => RegisterType::CtrlReg1M,
-
-            // CtrlReg2M
-            ParamType::FsM        => RegisterType::CtrlReg2M,
-            ParamType::RebootM    => RegisterType::CtrlReg2M,
-            ParamType::SoftResetM => RegisterType::CtrlReg2M,
-
-            // CtrlReg3M
-            ParamType::Md          => RegisterType::CtrlReg3M,
-            ParamType::I2cDisableM => RegisterType::CtrlReg3M,
-            ParamType::LowPowerM   => RegisterType::CtrlReg3M,
-            ParamType::SimM        => RegisterType::CtrlReg3M,
-            
-            // CtrlReg4M
-            ParamType::OpModeZ         => RegisterType::CtrlReg4M,
-            ParamType::BigLittleEndian => RegisterType::CtrlReg4M,
-            
-            // CtrlReg5M
-            ParamType::BlockDataUpdate => RegisterType::CtrlReg5M,
-
-            // IntCfgM
-            ParamType::Xien => RegisterType::IntCfgM,
-            ParamType::Yien => RegisterType::IntCfgM,
-            ParamType::Zien => RegisterType::IntCfgM,
-            ParamType::Iea  => RegisterType::IntCfgM,
-            ParamType::Iel  => RegisterType::IntCfgM,
-            ParamType::Ien  => RegisterType::IntCfgM,
-        }
-    }
-}
-
-enum_with_type!{
-    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-    enum Register,
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    enum_type RegisterType : 36; {
-        variant ActThs => u8,
-        variant ActDur => u8,
-        variant IntGenCfgXl => u8,
-        variant IntGenThsXXl => u8,
-        variant IntGenThsYXl => u8,
-        variant IntGenThsZXl => u8,
-        variant IntGenDurXl => u8,
-        variant ReferenceG => u8,
-        variant Int1Ctrl => u8,
-        variant Int2Ctrl => u8,
-        variant CtrlReg1G => u8,
-        variant CtrlReg2G => u8,
-        variant CtrlReg3G => u8,
-        variant OrientCfgG => u8,
-        variant CtrlReg4 => u8,
-        variant CtrlReg5Xl => u8,
-        variant CtrlReg6Xl => u8,
-        variant CtrlReg7Xl => u8,
-        variant CtrlReg8 => u8,
-        variant CtrlReg9 => u8,
-        variant CtrlReg10 => u8,
-        variant FifoCtrl => u8,
-        variant IntGenCfgG => u8,
-        variant IntGenThsXG => u16,
-        variant IntGenThsYG => u16,
-        variant IntGenThsZG => u16,
-        variant IntGenDurG => u8,
-        variant OffsetXRegM => u16,
-        variant OffsetYRegM => u16,
-        variant OffsetZRegM => u16,
-        variant CtrlReg1M => u8,
-        variant CtrlReg2M => u8,
-        variant CtrlReg3M => u8,
-        variant CtrlReg4M => u8,
-        variant CtrlReg5M => u8,
-        variant IntCfgM => u8,
-        
-    }
-}
->>>>>>> c96ebe66b569ef757bfc896a95dbdb37ad76cc66
-
-const ACT_THS:          Address = Address::RW(0x04);
-const ACT_DUR:          Address = Address::RW(0x05);
-const INT_GEN_CFG_XL:   Address = Address::RW(0x06);
-const INT_GEN_THS_X_XL: Address = Address::RW(0x07);
-const INT_GEN_THS_Y_XL: Address = Address::RW(0x08);
-const INT_GEN_THS_Z_XL: Address = Address::RW(0x09);
-const INT_GEN_DUR_XL:   Address = Address::RW(0x0A);
-const REFERENCE_G:      Address = Address::RW(0x0B);
-const INT1_CTRL:        Address = Address::RW(0x0C);
-const INT2_CTRL:        Address = Address::RW(0x0D);
-const CTRL_REG1_G:      Address = Address::RW(0x10);
-const CTRL_REG2_G:      Address = Address::RW(0x11);
-const CTRL_REG3_G:      Address = Address::RW(0x12);
-const ORIENT_CFG_G:     Address = Address::RW(0x13);
-const INT_GEN_SRC_G:    Address = Address::RW(0x14);
-const CTRL_REG4:        Address = Address::RW(0x1E);
-const CTRL_REG5_XL:     Address = Address::RW(0x1F);
-const CTRL_REG6_XL:     Address = Address::RW(0x20);
-const CTRL_REG7_XL:     Address = Address::RW(0x21);
-const CTRL_REG8:        Address = Address::RW(0x22);
-const CTRL_REG9:        Address = Address::RW(0x23);
-const CTRL_REG10:       Address = Address::RW(0x24);
-const FIFO_CTRL:        Address = Address::RW(0x2E);
-const INT_GEN_CFG_G:    Address = Address::RW(0x30);
-const INT_GEN_THS_X_G:  Address = Address::RW16(0x31);
-const INT_GEN_THS_Y_G:  Address = Address::RW16(0x33);
-const INT_GEN_THS_Z_G:  Address = Address::RW16(0x35);
-const INT_GEN_DUR_G:    Address = Address::RW(0x37);
-const OFFSET_X_REG_M:   Address = Address::RW16(0x05);
-const OFFSET_Y_REG_M:   Address = Address::RW16(0x07);
-const OFFSET_Z_REG_M:   Address = Address::RW16(0x09);
-const CTRL_REG1_M:      Address = Address::RW(0x20);
-const CTRL_REG2_M:      Address = Address::RW(0x21);
-const CTRL_REG3_M:      Address = Address::RW(0x22);
-const CTRL_REG4_M:      Address = Address::RW(0x23);
-const CTRL_REG5_M:      Address = Address::RW(0x24);
-const OUT_X_M:          Address = Address::R16(0x28);
-const OUT_Y_M:          Address = Address::R16(0x2A);
-const OUT_Z_M:          Address = Address::R16(0x2C);
-const INT_CFG_M:        Address = Address::RW(0x30);
-const INT_THS_M:        Address = Address::R16(0x32);
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct PatchConfig {
@@ -800,7 +369,7 @@ pub struct Config {
 }
 
 impl Config {
-    fn default() -> Config {
+    pub fn default() -> Config {
         Config {
             act_ths: act_ths::ActThs::default(),
             act_dur: act_dur::ActDur::default(),
@@ -1076,7 +645,7 @@ impl Config {
 }
 
 pub trait Register<RegSize> {
-    fn addr(&self) -> Address;
+    fn addr(&self) -> u8;
     
     fn default() -> Self;
 

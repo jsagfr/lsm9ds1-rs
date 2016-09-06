@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, ACT_THS};
 
 const ACT_THS_MASK:  u8 = 0b0111_1111;
@@ -11,7 +10,7 @@ pub struct ActThs {
 }
 
 impl Register<u8> for ActThs {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         ACT_THS
     }
     

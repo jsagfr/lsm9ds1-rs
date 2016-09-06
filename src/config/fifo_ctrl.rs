@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, FIFO_CTRL, FMode};
 
 const FMODE_MASK:          u8 = 0b111_00000;
@@ -16,7 +15,7 @@ pub struct FifoCtrl {
 }
 
 impl Register<u8> for FifoCtrl {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         FIFO_CTRL
     }
     

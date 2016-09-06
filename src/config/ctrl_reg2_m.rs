@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, CTRL_REG2_M, FsM};
 
 const ERRORS:       u8 = 0b1_00_1_00_11;
@@ -18,7 +17,7 @@ pub struct CtrlReg2M {
 }
 
 impl Register<u8> for CtrlReg2M {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         CTRL_REG2_M
     }
     

@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, INT_GEN_THS_X_G};
 
 const DCRM_G_MASK:          u16 = 0b1000_0000_0000_0000;
@@ -11,7 +10,7 @@ pub struct IntGenThsXG {
 }
 
 impl Register<u16> for IntGenThsXG {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         INT_GEN_THS_X_G
     }
     

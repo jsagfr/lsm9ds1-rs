@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, INT_GEN_THS_Y_XL};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -7,7 +6,7 @@ pub struct IntGenThsYXl {
 }
 
 impl Register<u8> for IntGenThsYXl {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         INT_GEN_THS_Y_XL
     }
     

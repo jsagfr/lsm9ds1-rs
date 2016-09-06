@@ -1,4 +1,3 @@
-use super::super::Address;
 use super::{Register, CTRL_REG7_XL, DigCutoffFreq};
 
 const ERRORS:   u8 = 0b000_11_0_1_0;
@@ -20,7 +19,7 @@ pub struct CtrlReg7XL {
 }
 
 impl Register<u8> for CtrlReg7XL {
-    fn addr(&self) -> Address {
+    fn addr(&self) -> u8 {
         CTRL_REG7_XL
     }
     
