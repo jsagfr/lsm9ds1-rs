@@ -27,6 +27,9 @@ use config::{
     FsXl,
     Md,
 };
+
+use std::u16::MAX;
+use std::f32;
 // use config::{Config, Param, Register};
 
 // #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -82,7 +85,13 @@ pub struct Lsm9ds1<I: Interface> {
 
 enum Interrupts{}
 
-
+const OUT_TEMP:   u8 = 0x15;
+const OUT_X_G:    u8 = 0x18;
+const OUT_Y_G:    u8 = 0x1A;
+const OUT_Z_G:    u8 = 0x1C;
+const OUT_X_XL:   u8 = 0x28;
+const OUT_Y_XL:   u8 = 0x2A;
+const OUT_Z_XL:   u8 = 0x2C;
 const WHO_AM_I:   u8 = 0x0F;
 const WHO_AM_I_M: u8 = 0x0F;
 const I_AM:       u8 = 0b0110_1000;
@@ -124,16 +133,66 @@ impl<I: Interface> Lsm9ds1<I> {
         Ok(lsm9ds1)
     }
 
-    pub fn temp(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn lx(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn ly(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn lz(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn gx(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn gy(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn gz(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn mx(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn my(&mut self) -> Result<f32,()> { unimplemented!() }
-    pub fn mz(&mut self) -> Result<f32,()> { unimplemented!() }
+    pub fn temp(&mut self) -> Result<f32,()> {
+        match self.interface.read16(OUT_TEMP) {
+            Ok(value) => Ok(f32::from(value as i16)),
+            Err(_) => Err(())
+        }
+    }
+    pub fn lx(&mut self) -> Result<f32,()> {
+        match self.interface.read16(OUT_X_XL) {
+            Ok(value) => Ok(self.config.fs_xl().value() * f32::from(value as i16) / (MAX as f32)),
+            Err(_) => Err(())
+        }
+    }
+    pub fn ly(&mut self) -> Result<f32,()> {
+        match self.interface.read16(OUT_Y_XL) {
+            Ok(value) => Ok(self.config.fs_xl().value() * f32::from(value as i16) / (MAX as f32)),
+            Err(_) => Err(())
+        }
+    }
+    pub fn lz(&mut self) -> Result<f32,()> {
+        match self.interface.read16(OUT_Z_XL) {
+            Ok(value) => Ok(self.config.fs_xl().value() * f32::from(value as i16) / (MAX as f32)),
+            Err(_) => Err(())
+        }
+    }
+    pub fn gx(&mut self) -> Result<f32,()> {
+        match self.interface.read16(OUT_X_G) {
+            Ok(value) => Ok(self.config.fs_g().value() * f32::from(value as i16) / (MAX as f32)),
+            Err(_) => Err(())
+        }
+    }
+    pub fn gy(&mut self) -> Result<f32,()> {
+        match self.interface.read16(OUT_Y_G) {
+            Ok(value) => Ok(self.config.fs_g().value() * f32::from(value as i16) / (MAX as f32)),
+            Err(_) => Err(())
+        }
+    }
+    pub fn gz(&mut self) -> Result<f32,()> {
+        match self.interface.read16(OUT_Z_G) {
+            Ok(value) => Ok(self.config.fs_g().value() * f32::from(value as i16) / (MAX as f32)),
+            Err(_) => Err(())
+        }
+    }
+    // pub fn mx(&mut self) -> Result<f32,()> {
+    //     match self.interface.read16(OUT_TEMP) {
+    //         Ok(value) => Ok(value as f16),
+    //         Err(_) => Err(())
+    //     }
+    // }
+    // pub fn my(&mut self) -> Result<f32,()> {
+    //     match self.interface.read16(OUT_TEMP) {
+    //         Ok(value) => Ok(value as f16),
+    //         Err(_) => Err(())
+    //     }
+    // }
+    // pub fn mz(&mut self) -> Result<f32,()> {
+    //     match self.interface.read16(OUT_TEMP) {
+    //         Ok(value) => Ok(value as f16),
+    //         Err(_) => Err(())
+    //     }
+    // }
     pub fn fifo(&mut self) -> Result<f32,()> { unimplemented!() }
     // pub fn linterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }
     // pub fn ginterrupts(&mut self) -> Result<Interrupts,()> { unimplemented!() }

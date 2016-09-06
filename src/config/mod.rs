@@ -68,6 +68,17 @@ impl GyroScale {
     fn default() -> GyroScale {
         GyroScale::FS245Dps
     }
+
+        
+    pub fn value(self) -> f32 {
+        match self {
+            GyroScale::NA => 0.0,
+            GyroScale::FS245Dps => 245.0,
+            GyroScale::FS500Dps => 500.0,
+            GyroScale::FS2000Dps => 2000.0,
+        }
+    }
+
 }
 
 /// Clarifications needed
@@ -219,8 +230,17 @@ pub enum FsM {
 }
 
 impl FsM {
-    fn default() -> FsM {
+    pub fn default() -> FsM {
         FsM::Fs4
+    }
+    
+    pub fn value(self) -> f32 {
+        match self {
+            FsM::Fs4 => 4.0,
+            FsM::Fs8 => 8.0,
+            FsM::Fs12 => 12.0,
+            FsM::Fs16 => 16.0,
+        }
     }
 }
 
@@ -233,8 +253,17 @@ pub enum FsXl {
 }
 
 impl FsXl {
-    fn default() -> FsXl {
+    pub fn default() -> FsXl {
         FsXl::Fs2
+    }
+    
+    pub fn value(self) -> f32 {
+        match self {
+            FsXl::Fs2 => 2.0,
+            FsXl::Fs4 => 4.0,
+            FsXl::Fs8 => 8.0,
+            FsXl::Fs16 => 16.0,
+        }
     }
 }
 
