@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, OFFSET_X_REG_M};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6,7 +7,7 @@ pub struct OffsetXRegM {
 }
 
 impl Register<u16> for OffsetXRegM {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         OFFSET_X_REG_M
     }
     

@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, CTRL_REG3_G};
 
 const ERRORS_MASK:  u8 = 0b00_11_0000;
@@ -13,7 +14,7 @@ pub struct CtrlReg3G {
 }
 
 impl Register<u8> for CtrlReg3G {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         CTRL_REG3_G
     }
     

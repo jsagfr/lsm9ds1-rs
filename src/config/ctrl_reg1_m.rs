@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, CTRL_REG1_M, OpMode, OutputDataRate};
 
 const TEMP_COMP:          u8 = 0b1_00_000_0_0;
@@ -31,7 +32,7 @@ pub struct CtrlReg1M {
 }
 
 impl Register<u8> for CtrlReg1M {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         CTRL_REG1_M
     }
     

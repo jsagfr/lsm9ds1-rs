@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, ACT_DUR};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -7,7 +8,7 @@ pub struct ActDur {
 
 impl Register<u8> for ActDur {
     // const ADDR: Address = Address::RW(0x04);
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         ACT_DUR
     }
     

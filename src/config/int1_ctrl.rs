@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, INT1_CTRL};
 
 const INT1_IG_G:    u8 = 0b10000000;
@@ -22,7 +23,7 @@ pub struct Int1Ctrl {
 }
 
 impl Register<u8> for Int1Ctrl {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         INT1_CTRL
     }
     

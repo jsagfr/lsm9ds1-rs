@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, CTRL_REG1_G, DataRate, GyroScale, Bw};
 
 const ODR_G_MASK:       u8 = 0b111_00000;
@@ -29,7 +30,7 @@ pub struct CtrlReg1G {
 }
 
 impl Register<u8> for CtrlReg1G {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         CTRL_REG1_G
     }
     

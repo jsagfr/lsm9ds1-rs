@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, REFERENCE_G};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6,7 +7,7 @@ pub struct ReferenceG {
 }
 
 impl Register<u8> for ReferenceG {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         REFERENCE_G
     }
     

@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, INT_GEN_DUR_G};
 
 const WAIT_G_MASK: u8 = 0b10000000;
@@ -10,7 +11,7 @@ pub struct IntGenDurG {
 }
 
 impl Register<u8> for IntGenDurG {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         INT_GEN_DUR_G
     }
     

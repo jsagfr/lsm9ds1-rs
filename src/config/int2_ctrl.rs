@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, INT2_CTRL};
 
 const INT2_INACT:     u8 = 0b10000000;
@@ -22,7 +23,7 @@ pub struct Int2Ctrl {
 }
 
 impl Register<u8> for Int2Ctrl {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         INT2_CTRL
     }
     

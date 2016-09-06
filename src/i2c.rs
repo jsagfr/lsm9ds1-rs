@@ -2,50 +2,93 @@
 use i2cdev::linux::LinuxI2CDevice;
 use i2cdev::core::I2CDevice;
 
-use super::{Interface};
+use super::{Interface, Address};
 // use register::{ReadAddress, ReadWordAddress, WriteAddress, Write};
 
-const SLAVE_ADDR2: u16 = 0x6b;
+const I2C_ACC_GYRO_ADDR: u16 = 0x6b;
+const I2C_MAGN_ADDR:     u16 = 0x1e;
 
 pub struct I2cInterface {
-    acc_dev: LinuxI2CDevice
+    acc_gyro_dev: LinuxI2CDevice,
+    magn_dev: LinuxI2CDevice,
 }
 
 
 impl I2cInterface {
-    pub fn new(acc_path: &str) -> I2cInterface {
+    pub fn new(i2c_path: &str) -> I2cInterface {
         I2cInterface {
-            acc_dev: LinuxI2CDevice::new(acc_path, SLAVE_ADDR2).expect("unable to open device")
+            acc_gyro_dev: LinuxI2CDevice::new(i2c_path, I2C_ACC_GYRO_ADDR).expect("unable to open device"),
+            magn_dev: LinuxI2CDevice::new(i2c_path, I2C_MAGN_ADDR).expect("unable to open device"),
         }
     }
 }
 
 impl Interface for I2cInterface {
-    fn read(&mut self, address: u8) -> Result<u8,()> {
-        match self.acc_dev.smbus_read_byte_data(address) {
-            Ok(res) => Ok(res),
-            _ => Err(())
+    fn read(&mut self, address: Address) -> Result<u8,()> {
+        match address {
+            Address::AccGyro(addr) => {
+                match self.acc_gyro_dev.smbus_read_byte_data(addr) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
+            Address::Magn(addr) => {
+                match self.magn_dev.smbus_read_byte_data(addr) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
         }
     }
     
-    fn read16(&mut self, address: u8) -> Result<u16,()>{
-        match self.acc_dev.smbus_read_word_data(address) {
-            Ok(res) => Ok(res),
-            _ => Err(())
+    fn read16(&mut self, address: Address) -> Result<u16,()>{
+        match address {
+            Address::AccGyro(addr) => {
+                match self.acc_gyro_dev.smbus_read_word_data(addr) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
+            Address::Magn(addr) => {
+                match self.magn_dev.smbus_read_word_data(addr) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
         }
     }
     
-    fn write(&mut self, address: u8, value: u8) -> Result<(),()>{
-        match self.acc_dev.smbus_write_byte_data(address, value) {
-            Ok(_) => Ok(()),
-            _ => Err(())
+    fn write(&mut self, address: Address, value: u8) -> Result<(),()>{
+        match address {
+            Address::AccGyro(addr) => {
+                match self.acc_gyro_dev.smbus_write_byte_data(addr, value) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
+            Address::Magn(addr) => {
+                match self.magn_dev.smbus_write_byte_data(addr, value) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
         }
     }
     
-    fn write16(&mut self, address: u8, value: u16) -> Result<(),()>{
-        match self.acc_dev.smbus_write_word_data(address, value) {
-            Ok(_) => Ok(()),
-            _ => Err(())
+    fn write16(&mut self, address: Address, value: u16) -> Result<(),()>{
+        match address {
+            Address::AccGyro(addr) => {
+                match self.acc_gyro_dev.smbus_write_word_data(addr, value) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
+            Address::Magn(addr) => {
+                match self.magn_dev.smbus_write_word_data(addr, value) {
+                    Ok(res) => Ok(res),
+                    _ => Err(())
+                }
+            }
         }
     }
 }

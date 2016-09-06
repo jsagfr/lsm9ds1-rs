@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, INT_GEN_CFG_G};
 
 const AOI_G:  u8 = 0b10000000;
@@ -22,7 +23,7 @@ pub struct IntGenCfgG {
 }
 
 impl Register<u8> for IntGenCfgG {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         INT_GEN_CFG_G
     }
     

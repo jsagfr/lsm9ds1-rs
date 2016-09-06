@@ -1,3 +1,4 @@
+use super::super::Address;
 use super::{Register, ORIENT_CFG_G};
 
 const ERRORS_MASK:   u8 = 0b11_000_000;
@@ -15,7 +16,7 @@ pub struct OrientCfgG {
 }
 
 impl Register<u8> for OrientCfgG {
-    fn addr(&self) -> u8 {
+    fn addr(&self) -> Address {
         ORIENT_CFG_G
     }
     
